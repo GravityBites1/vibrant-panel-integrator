@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import { 
   LayoutDashboard, Users, ShoppingCart, Settings, Menu, 
-  LogOut, Sun, Moon, Loader, Store 
+  LogOut, Sun, Moon, Loader, Store, LineChart as CampaignIcon 
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link, Outlet, useLocation } from "react-router-dom";
@@ -34,6 +34,7 @@ const Index = () => {
     { icon: Users, label: 'Users', path: '/users' },
     { icon: Store, label: 'Stores', path: '/stores' },
     { icon: ShoppingCart, label: 'Orders', path: '/orders' },
+    { icon: CampaignIcon, label: 'Campaigns', path: '/campaigns' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 

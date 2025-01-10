@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Orders from "./pages/dashboard/Orders";
 import Users from "./pages/dashboard/Users";
 import Stores from "./pages/dashboard/Stores";
+import Campaigns from "./pages/dashboard/Campaigns";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
               <Route path="/orders" element={<Orders />} />
               <Route path="/users" element={<Users />} />
               <Route path="/stores" element={<Stores />} />
+              <Route path="/campaigns" element={<Campaigns />} />
             </Route>
           </Routes>
         </BrowserRouter>
