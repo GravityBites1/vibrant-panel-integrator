@@ -28,8 +28,23 @@ const formSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof formSchema>;
 
+interface NotificationPreferences {
+  channels: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+  };
+  types: {
+    payout: boolean;
+    rating: boolean;
+    low_stock: boolean;
+    new_order: boolean;
+  };
+}
+
 export default function Settings() {
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
@@ -52,40 +67,50 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    loadSettings();
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        loadSettings(user.id);
+      }
+    };
+    getCurrentUser();
   }, []);
 
-  const loadSettings = async () => {
+  const loadSettings = async (uid: string) => {
     try {
       const { data: userSettings, error: settingsError } = await supabase
         .from("user_settings")
         .select("*")
+        .eq("user_id", uid)
         .single();
 
       if (settingsError) throw settingsError;
+
+      const { data: notifPrefs, error: notifError } = await supabase
+        .from("notification_preferences")
+        .select("*")
+        .eq("user_id", uid)
+        .single();
+
+      if (notifError) throw notifError;
 
       if (userSettings) {
         form.reset({
           language: userSettings.language,
           currency: userSettings.currency,
           theme: userSettings.theme,
-          notification_preferences: userSettings.notification_preferences
-        });
-      }
-
-      const { data: notifPrefs, error: notifError } = await supabase
-        .from("notification_preferences")
-        .select("*")
-        .single();
-
-      if (notifError) throw notifError;
-
-      if (notifPrefs) {
-        form.setValue("notification_preferences", {
-          email_enabled: notifPrefs.channels.email,
-          push_enabled: notifPrefs.channels.push,
-          sms_enabled: notifPrefs.channels.sms,
-          notification_types: notifPrefs.types
+          notification_preferences: {
+            email_enabled: notifPrefs?.channels?.email ?? true,
+            push_enabled: notifPrefs?.channels?.push ?? true,
+            sms_enabled: notifPrefs?.channels?.sms ?? false,
+            notification_types: notifPrefs?.types ?? {
+              payout: true,
+              rating: true,
+              low_stock: true,
+              new_order: true
+            }
+          }
         });
       }
     } catch (error) {
@@ -101,11 +126,14 @@ export default function Settings() {
   };
 
   const onSubmit = async (values: SettingsFormValues) => {
+    if (!userId) return;
+
     try {
       // Update user settings
       const { error: settingsError } = await supabase
         .from("user_settings")
         .upsert({
+          user_id: userId,
           language: values.language,
           currency: values.currency,
           theme: values.theme
@@ -114,15 +142,21 @@ export default function Settings() {
       if (settingsError) throw settingsError;
 
       // Update notification preferences
+      const notificationPrefs: NotificationPreferences = {
+        channels: {
+          email: values.notification_preferences.email_enabled,
+          push: values.notification_preferences.push_enabled,
+          sms: values.notification_preferences.sms_enabled
+        },
+        types: values.notification_preferences.notification_types
+      };
+
       const { error: notifError } = await supabase
         .from("notification_preferences")
         .upsert({
-          channels: {
-            email: values.notification_preferences.email_enabled,
-            push: values.notification_preferences.push_enabled,
-            sms: values.notification_preferences.sms_enabled
-          },
-          types: values.notification_preferences.notification_types
+          user_id: userId,
+          channels: notificationPrefs.channels,
+          types: notificationPrefs.types
         });
 
       if (notifError) throw notifError;
