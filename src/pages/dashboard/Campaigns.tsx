@@ -34,6 +34,7 @@ export default function Campaigns() {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("Fetching campaigns data...");
     fetchCampaigns();
     setupRealtimeSubscription();
   }, []);
@@ -51,6 +52,9 @@ export default function Campaigns() {
           )
         `);
 
+      console.log("Fetched campaign data:", campaignData);
+      console.log("Campaign error if any:", campaignError);
+
       if (campaignError) throw campaignError;
 
       if (campaignData) {
@@ -64,6 +68,7 @@ export default function Campaigns() {
           active_campaigns: campaignData.filter(c => c.status === 'active').length
         };
         
+        console.log("Calculated metrics:", metrics);
         setMetrics(metrics);
       }
     } catch (error) {
@@ -79,6 +84,7 @@ export default function Campaigns() {
   };
 
   const setupRealtimeSubscription = () => {
+    console.log("Setting up realtime subscription...");
     const channel = supabase
       .channel('campaign-changes')
       .on(
