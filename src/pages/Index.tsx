@@ -36,6 +36,7 @@ const Index = () => {
     { icon: ShoppingCart, label: 'Orders', path: '/orders' },
     { icon: CampaignIcon, label: 'Campaigns', path: '/campaigns' },
     { icon: List, label: 'Categories', path: '/categories' },
+    { icon: List, label: 'Platform Categories', path: '/platform-categories' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 

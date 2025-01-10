@@ -3339,6 +3339,8 @@ export type Database = {
       }
       promotions: {
         Row: {
+          buy_one_get_one: boolean | null
+          buy_one_get_one_menu_item_id: string | null
           code: string
           created_at: string | null
           current_usage: number | null
@@ -3357,6 +3359,8 @@ export type Database = {
           value: number
         }
         Insert: {
+          buy_one_get_one?: boolean | null
+          buy_one_get_one_menu_item_id?: string | null
           code: string
           created_at?: string | null
           current_usage?: number | null
@@ -3375,6 +3379,8 @@ export type Database = {
           value: number
         }
         Update: {
+          buy_one_get_one?: boolean | null
+          buy_one_get_one_menu_item_id?: string | null
           code?: string
           created_at?: string | null
           current_usage?: number | null
@@ -3393,6 +3399,13 @@ export type Database = {
           value?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "promotions_buy_one_get_one_menu_item_id_fkey"
+            columns: ["buy_one_get_one_menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "promotions_restaurant_id_fkey"
             columns: ["restaurant_id"]
