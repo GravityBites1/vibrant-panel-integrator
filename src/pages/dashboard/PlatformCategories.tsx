@@ -76,31 +76,31 @@ export default function PlatformCategories() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log("Submitting values:", values); // Debug log
+      console.log("Submitting values:", values);
 
+      // Ensure all required fields are present and properly typed
       const newCategory = {
         name: values.name,
-        commission_rate: parseFloat(values.commission_rate),
-        platform_fee: parseFloat(values.platform_fee),
-        gst_rate: parseFloat(values.gst_rate),
-        points_rate: parseFloat(values.points_rate),
-        points_expiry_days: values.points_expiry_days ? parseInt(values.points_expiry_days) : null,
+        commission_rate: Number(values.commission_rate),
+        platform_fee: Number(values.platform_fee),
+        gst_rate: Number(values.gst_rate),
+        points_rate: Number(values.points_rate),
+        points_expiry_days: values.points_expiry_days ? Number(values.points_expiry_days) : null,
       };
 
-      console.log("Formatted category:", newCategory); // Debug log
+      console.log("Formatted category:", newCategory);
 
       const { data, error } = await supabase
         .from("platform_categories")
-        .insert(newCategory)
-        .select()
-        .single();
+        .insert([newCategory]) // Note: Wrap in array for insert
+        .select();
 
       if (error) {
-        console.error("Supabase error:", error); // Debug log
+        console.error("Supabase error:", error);
         throw error;
       }
 
-      console.log("Insert response:", data); // Debug log
+      console.log("Insert response:", data);
 
       toast({
         title: "Success",
