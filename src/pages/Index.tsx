@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [session, setSession] = useState(null);
+  const session = useSession();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,32 +36,14 @@ const Index = () => {
   ];
 
   useEffect(() => {
-    console.log("Index component mounted");
-    checkUser();
-    fetchStats();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      console.log("Checking user authentication");
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      
-      console.log("Session status:", session ? "Authenticated" : "Not authenticated");
-      setSession(session);
-      if (!session) {
-        console.log("No session found, redirecting to login");
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to check authentication status",
-        variant: "destructive"
-      });
+    console.log("Index component mounted, session:", session ? "Yes" : "No");
+    if (!session) {
+      console.log("No session found, redirecting to login");
+      navigate('/login');
+      return;
     }
-  };
+    fetchStats();
+  }, [session, navigate]);
 
   const fetchStats = async () => {
     setIsLoading(true);
@@ -271,6 +254,3 @@ const Index = () => {
       </div>
     </div>
   );
-};
-
-export default Index;
