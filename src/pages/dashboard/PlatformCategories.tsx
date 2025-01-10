@@ -76,6 +76,8 @@ export default function PlatformCategories() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      console.log("Submitting values:", values); // Debug log
+
       const newCategory = {
         name: values.name,
         commission_rate: parseFloat(values.commission_rate),
@@ -85,11 +87,20 @@ export default function PlatformCategories() {
         points_expiry_days: values.points_expiry_days ? parseInt(values.points_expiry_days) : null,
       };
 
-      const { error } = await supabase
-        .from("platform_categories")
-        .insert(newCategory);
+      console.log("Formatted category:", newCategory); // Debug log
 
-      if (error) throw error;
+      const { data, error } = await supabase
+        .from("platform_categories")
+        .insert(newCategory)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Supabase error:", error); // Debug log
+        throw error;
+      }
+
+      console.log("Insert response:", data); // Debug log
 
       toast({
         title: "Success",
