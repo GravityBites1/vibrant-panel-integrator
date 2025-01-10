@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,17 +11,14 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setStats, toggleDarkMode, toggleSidebar, setLoading } from "@/store/slices/dashboardSlice";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { stats, isDarkMode, isSidebarOpen, isLoading } = useAppSelector(state => state.dashboard);
   const location = useLocation();
-  const [stats, setStats] = useState({
-    totalOrders: 120,
-    totalUsers: 45,
-    revenue: 15000
-  });
 
   // Sample data for chart
   const data = [
@@ -32,11 +29,6 @@ const Index = () => {
     { name: 'May', value: 700 }
   ];
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
-  };
-
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'Users', path: '/users' },
@@ -44,6 +36,50 @@ const Index = () => {
     { icon: ShoppingCart, label: 'Orders', path: '/orders' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        dispatch(setLoading(true));
+        
+        // Fetch orders count
+        const { count: ordersCount } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact' });
+
+        // Fetch users count
+        const { count: usersCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact' });
+
+        // Calculate total revenue
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('total_amount')
+          .eq('status', 'delivered');
+
+        const totalRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+
+        dispatch(setStats({
+          totalOrders: ordersCount || 0,
+          totalUsers: usersCount || 0,
+          revenue: totalRevenue
+        }));
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch dashboard data",
+          variant: "destructive"
+        });
+      } finally {
+        dispatch(setLoading(false));
+      }
+    };
+
+    fetchDashboardData();
+  }, [dispatch]);
 
   if (isLoading) {
     return (
@@ -70,7 +106,7 @@ const Index = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                onClick={() => dispatch(toggleSidebar())}
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -100,7 +136,7 @@ const Index = () => {
               <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
                 Dashboard Overview
               </h2>
-              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              <Button variant="ghost" size="icon" onClick={() => dispatch(toggleDarkMode())}>
                 {isDarkMode ? (
                   <Sun className="h-5 w-5" />
                 ) : (
