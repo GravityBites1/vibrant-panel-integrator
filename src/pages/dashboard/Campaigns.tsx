@@ -16,21 +16,20 @@ interface Campaign {
 }
 
 interface CampaignMetrics {
-  id: string;
-  budget_range_start: number;
-  budget_range_end: number;
-  estimated_menu_visits: number;
-  estimated_orders_min: number;
-  estimated_orders_max: number;
-  estimated_reach_min: number;
-  estimated_reach_max: number;
-  estimated_sales_min: number;
-  estimated_sales_max: number;
+  total_stores: number;
+  total_budget: number;
+  total_spent: number;
+  active_campaigns: number;
 }
 
 export default function Campaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [metrics, setMetrics] = useState<CampaignMetrics[]>([]);
+  const [metrics, setMetrics] = useState<CampaignMetrics>({
+    total_stores: 0,
+    total_budget: 0,
+    total_spent: 0,
+    active_campaigns: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -41,20 +40,32 @@ export default function Campaigns() {
 
   const fetchCampaigns = async () => {
     try {
+      // Fetch campaigns with store details
       const { data: campaignData, error: campaignError } = await supabase
         .from('ad_campaigns')
-        .select('*');
+        .select(`
+          *,
+          stores:restaurant_id (
+            name,
+            description
+          )
+        `);
 
       if (campaignError) throw campaignError;
 
-      const { data: metricsData, error: metricsError } = await supabase
-        .from('ad_campaign_metrics')
-        .select('*');
-
-      if (metricsError) throw metricsError;
-
-      setCampaigns(campaignData);
-      setMetrics(metricsData);
+      if (campaignData) {
+        setCampaigns(campaignData);
+        
+        // Calculate metrics
+        const metrics: CampaignMetrics = {
+          total_stores: new Set(campaignData.map(c => c.restaurant_id)).size,
+          total_budget: campaignData.reduce((sum, c) => sum + (c.budget_amount || 0), 0),
+          total_spent: campaignData.reduce((sum, c) => sum + (c.spent_amount || 0), 0),
+          active_campaigns: campaignData.filter(c => c.status === 'active').length
+        };
+        
+        setMetrics(metrics);
+      }
     } catch (error) {
       console.error('Error fetching campaign data:', error);
       toast({
@@ -78,14 +89,6 @@ export default function Campaigns() {
           fetchCampaigns();
         }
       )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'ad_campaign_metrics' },
-        (payload) => {
-          console.log('Metrics change received:', payload);
-          fetchCampaigns();
-        }
-      )
       .subscribe();
 
     return () => {
@@ -101,14 +104,25 @@ export default function Campaigns() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Campaign Performance</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Stores Running Ads</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {metrics.total_stores}
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Active Campaigns</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {campaigns.filter(c => c.status === 'active').length}
+              {metrics.active_campaigns}
             </div>
           </CardContent>
         </Card>
@@ -119,7 +133,7 @@ export default function Campaigns() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${campaigns.reduce((sum, c) => sum + (c.budget_amount || 0), 0).toFixed(2)}
+              ${metrics.total_budget.toFixed(2)}
             </div>
           </CardContent>
         </Card>
@@ -130,7 +144,7 @@ export default function Campaigns() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${campaigns.reduce((sum, c) => sum + (c.spent_amount || 0), 0).toFixed(2)}
+              ${metrics.total_spent.toFixed(2)}
             </div>
           </CardContent>
         </Card>
