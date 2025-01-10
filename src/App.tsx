@@ -10,6 +10,7 @@ import Orders from "./pages/dashboard/Orders";
 import Users from "./pages/dashboard/Users";
 import Stores from "./pages/dashboard/Stores";
 import Campaigns from "./pages/dashboard/Campaigns";
+import Categories from "./pages/dashboard/Categories";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/users" element={<Users />} />
               <Route path="/stores" element={<Stores />} />
               <Route path="/campaigns" element={<Campaigns />} />
+              <Route path="/categories" element={<Categories />} />
             </Route>
           </Routes>
         </BrowserRouter>
