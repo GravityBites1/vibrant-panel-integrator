@@ -7,14 +7,16 @@ import {
 } from 'recharts';
 import { 
   LayoutDashboard, Users, ShoppingCart, Settings, Menu, 
-  LogOut, Sun, Moon, Loader 
+  LogOut, Sun, Moon, Loader, Store 
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
   const [stats, setStats] = useState({
     totalOrders: 120,
     totalUsers: 45,
@@ -34,6 +36,14 @@ const Index = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle('dark');
   };
+
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: Users, label: 'Users', path: '/users' },
+    { icon: Store, label: 'Stores', path: '/stores' },
+    { icon: ShoppingCart, label: 'Orders', path: '/orders' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+  ];
 
   if (isLoading) {
     return (
@@ -67,20 +77,16 @@ const Index = () => {
             </div>
             <ScrollArea className="flex-1 py-4">
               <nav className="space-y-2 px-2">
-                {[
-                  { icon: LayoutDashboard, label: 'Dashboard', active: true },
-                  { icon: Users, label: 'Users' },
-                  { icon: ShoppingCart, label: 'Orders' },
-                  { icon: Settings, label: 'Settings' },
-                ].map((item) => (
-                  <Button
-                    key={item.label}
-                    variant={item.active ? 'secondary' : 'ghost'}
-                    className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
-                  >
-                    <item.icon className="h-5 w-5 mr-2" />
-                    {isSidebarOpen && <span>{item.label}</span>}
-                  </Button>
+                {navItems.map((item) => (
+                  <Link key={item.path} to={item.path}>
+                    <Button
+                      variant={location.pathname === item.path ? 'secondary' : 'ghost'}
+                      className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
+                    >
+                      <item.icon className="h-5 w-5 mr-2" />
+                      {isSidebarOpen && <span>{item.label}</span>}
+                    </Button>
+                  </Link>
                 ))}
               </nav>
             </ScrollArea>
@@ -103,66 +109,72 @@ const Index = () => {
               </Button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    Total Orders
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalOrders}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    Total Users
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    Total Revenue
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    ${stats.revenue.toFixed(2)}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Chart */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Revenue Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={data}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="#6e59a5" 
-                        strokeWidth={2} 
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+            {location.pathname === '/' ? (
+              <>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm font-medium">
+                        Total Orders
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats.totalOrders}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm font-medium">
+                        Total Users
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm font-medium">
+                        Total Revenue
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        ${stats.revenue.toFixed(2)}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Chart */}
+                <Card className="mb-8">
+                  <CardHeader>
+                    <CardTitle>Revenue Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={data}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#6e59a5" 
+                            strokeWidth={2} 
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <Outlet />
+            )}
           </div>
         </main>
       </div>
