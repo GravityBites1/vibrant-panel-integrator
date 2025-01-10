@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSession } from "@supabase/auth-helpers-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,18 +12,16 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const navigate = useNavigate();
-  const session = useSession();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState({
-    totalOrders: 0,
-    totalUsers: 0,
-    revenue: 0
+    totalOrders: 120,
+    totalUsers: 45,
+    revenue: 15000
   });
 
-  // Sample data for chart - you can replace with real data
+  // Sample data for chart
   const data = [
     { name: 'Jan', value: 400 },
     { name: 'Feb', value: 300 },
@@ -35,80 +30,9 @@ const Index = () => {
     { name: 'May', value: 700 }
   ];
 
-  useEffect(() => {
-    console.log("Index component mounted, session:", session ? "Yes" : "No");
-    if (!session) {
-      console.log("No session found, redirecting to login");
-      navigate('/login');
-      return;
-    }
-    fetchStats();
-  }, [session, navigate]);
-
-  const fetchStats = async () => {
-    setIsLoading(true);
-    try {
-      console.log("Fetching dashboard stats");
-      // Fetch total orders
-      const { count: orderCount, error: orderError } = await supabase
-        .from('orders')
-        .select('*', { count: 'exact' });
-
-      if (orderError) throw orderError;
-
-      // Fetch total users
-      const { count: userCount, error: userError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact' });
-
-      if (userError) throw userError;
-
-      // Fetch total revenue
-      const { data: orders, error: revenueError } = await supabase
-        .from('orders')
-        .select('total_amount');
-
-      if (revenueError) throw revenueError;
-
-      const totalRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
-
-      console.log("Stats fetched:", { orderCount, userCount, totalRevenue });
-
-      setStats({
-        totalOrders: orderCount || 0,
-        totalUsers: userCount || 0,
-        revenue: totalRevenue
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch dashboard statistics",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle('dark');
-  };
-
-  const handleLogout = async () => {
-    try {
-      console.log("Logging out");
-      await supabase.auth.signOut();
-      navigate('/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive"
-      });
-    }
   };
 
   if (isLoading) {
@@ -160,16 +84,6 @@ const Index = () => {
                 ))}
               </nav>
             </ScrollArea>
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5 mr-2" />
-                {isSidebarOpen && <span>Logout</span>}
-              </Button>
-            </div>
           </div>
         </aside>
 
