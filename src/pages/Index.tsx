@@ -35,15 +35,21 @@ const Index = () => {
   ];
 
   useEffect(() => {
+    console.log("Index component mounted");
     checkUser();
     fetchStats();
   }, []);
 
   const checkUser = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log("Checking user authentication");
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      
+      console.log("Session status:", session ? "Authenticated" : "Not authenticated");
       setSession(session);
       if (!session) {
+        console.log("No session found, redirecting to login");
         navigate('/login');
       }
     } catch (error) {
@@ -59,22 +65,31 @@ const Index = () => {
   const fetchStats = async () => {
     setIsLoading(true);
     try {
+      console.log("Fetching dashboard stats");
       // Fetch total orders
-      const { count: orderCount } = await supabase
+      const { count: orderCount, error: orderError } = await supabase
         .from('orders')
         .select('*', { count: 'exact' });
 
+      if (orderError) throw orderError;
+
       // Fetch total users
-      const { count: userCount } = await supabase
+      const { count: userCount, error: userError } = await supabase
         .from('profiles')
         .select('*', { count: 'exact' });
 
+      if (userError) throw userError;
+
       // Fetch total revenue
-      const { data: orders } = await supabase
+      const { data: orders, error: revenueError } = await supabase
         .from('orders')
         .select('total_amount');
 
+      if (revenueError) throw revenueError;
+
       const totalRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+
+      console.log("Stats fetched:", { orderCount, userCount, totalRevenue });
 
       setStats({
         totalOrders: orderCount || 0,
@@ -100,6 +115,7 @@ const Index = () => {
 
   const handleLogout = async () => {
     try {
+      console.log("Logging out");
       await supabase.auth.signOut();
       navigate('/login');
     } catch (error) {
