@@ -9,21 +9,23 @@ import {
 } from 'recharts';
 import { 
   LayoutDashboard, Users, ShoppingCart, Settings, Menu, 
-  LogOut, Sun, Moon 
+  LogOut, Sun, Moon, Loader 
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalUsers: 0,
     revenue: 0
   });
 
-  // Sample data for chart
+  // Sample data for chart - you can replace with real data
   const data = [
     { name: 'Jan', value: 400 },
     { name: 'Feb', value: 300 },
@@ -33,31 +35,29 @@ const Index = () => {
   ];
 
   useEffect(() => {
-    // Check authentication
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
-        navigate('/login');
-      }
-    });
-
-    // Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) {
-        navigate('/login');
-      }
-    });
-
-    // Fetch dashboard stats
+    checkUser();
     fetchStats();
-
-    return () => subscription.unsubscribe();
   }, []);
 
+  const checkUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      if (!session) {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check authentication status",
+        variant: "destructive"
+      });
+    }
+  };
+
   const fetchStats = async () => {
+    setIsLoading(true);
     try {
       // Fetch total orders
       const { count: orderCount } = await supabase
@@ -83,6 +83,13 @@ const Index = () => {
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch dashboard statistics",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -92,8 +99,26 @@ const Index = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive"
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark' : ''}`}>
