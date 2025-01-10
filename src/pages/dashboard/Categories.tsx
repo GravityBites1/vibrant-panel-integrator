@@ -14,13 +14,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define the allowed store types
+type StoreType = "restaurant" | "grocery" | "pet_food" | "beverages" | "other";
+
 const Categories = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    store_type: "restaurant",
+    store_type: "restaurant" as StoreType, // Type assertion to ensure correct type
     is_active: true,
   });
 
@@ -102,7 +105,7 @@ const Categories = () => {
               <Label htmlFor="store_type">Store Type</Label>
               <Select
                 value={formData.store_type}
-                onValueChange={(value) =>
+                onValueChange={(value: StoreType) =>
                   setFormData({ ...formData, store_type: value })
                 }
               >
@@ -112,7 +115,9 @@ const Categories = () => {
                 <SelectContent>
                   <SelectItem value="restaurant">Restaurant</SelectItem>
                   <SelectItem value="grocery">Grocery</SelectItem>
-                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  <SelectItem value="pet_food">Pet Food</SelectItem>
+                  <SelectItem value="beverages">Beverages</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
