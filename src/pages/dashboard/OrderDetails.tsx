@@ -18,12 +18,49 @@ interface Order {
   delivery_instructions: string;
 }
 
+// Demo data with valid UUID
+const demoOrders: Record<string, Order> = {
+  "1": {
+    id: "550e8400-e29b-41d4-a716-446655440000",
+    customer_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    store_id: "b5c89253-6ef4-4d4f-8e6b-e5eafb6d2d4d",
+    status: "delivered",
+    total_amount: 49.99,
+    created_at: "2024-03-15T10:30:00Z",
+    order_number: "ORD001",
+    delivery_address: "123 Main St, City",
+    customer_name: "John Doe",
+    delivery_partner_id: "c9d6c879-df6d-4d6c-8e6b-e5eafb6d2d4d",
+    delivery_instructions: "Leave at door"
+  },
+  "2": {
+    id: "550e8400-e29b-41d4-a716-446655440001",
+    customer_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12",
+    store_id: "b5c89253-6ef4-4d4f-8e6b-e5eafb6d2d4e",
+    status: "pending",
+    total_amount: 75.50,
+    created_at: "2024-03-15T11:45:00Z",
+    order_number: "ORD002",
+    delivery_address: "456 Oak St, City",
+    customer_name: "Jane Smith",
+    delivery_partner_id: "c9d6c879-df6d-4d6c-8e6b-e5eafb6d2d4e",
+    delivery_instructions: "Call upon arrival"
+  }
+};
+
 export default function OrderDetails() {
   const { id } = useParams();
 
+  // For demo purposes, return mock data directly
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
     queryFn: async () => {
+      // For demo, return mock data
+      if (id && demoOrders[id]) {
+        return demoOrders[id];
+      }
+      
+      // Fallback to real API call if no demo data
       const { data, error } = await supabase
         .from('orders')
         .select('*')
