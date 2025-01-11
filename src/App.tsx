@@ -17,6 +17,7 @@ import Promotions from "./pages/dashboard/Promotions";
 import Reviews from "./pages/dashboard/Reviews";
 import Inventory from "./pages/dashboard/Inventory";
 import SupportTickets from "./pages/dashboard/SupportTickets";
+import SupportChat from "./pages/dashboard/SupportChat";
 import Reports from "./pages/dashboard/Reports";
 import Payments from "./pages/dashboard/Payments";
 import DeliveryPartners from "./pages/dashboard/DeliveryPartners";
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/support-tickets" element={<SupportTickets />} />
+              <Route path="/support-chat" element={<SupportChat />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/delivery-partners" element={<DeliveryPartners />} />
