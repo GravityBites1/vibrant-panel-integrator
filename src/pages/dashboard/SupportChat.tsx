@@ -38,6 +38,16 @@ interface ChatMessage {
 const SupportChat = () => {
   const [message, setMessage] = useState("");
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get current user ID on component mount
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   const { data: chats, isLoading: chatsLoading } = useQuery({
     queryKey: ['chat_rooms'],
@@ -90,19 +100,14 @@ const SupportChat = () => {
   });
 
   const sendMessage = async () => {
-    if (!message.trim() || !selectedChat) return;
-
-    const user = await supabase.auth.getUser();
-    const userId = user.data.user?.id;
-
-    if (!userId) return;
+    if (!message.trim() || !selectedChat || !currentUserId) return;
 
     const { error } = await supabase
       .from('chat_messages')
       .insert({
         room_id: selectedChat,
         content: message,
-        sender_id: userId
+        sender_id: currentUserId
       });
 
     if (!error) {
@@ -207,30 +212,27 @@ const SupportChat = () => {
             {/* Messages Area */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages?.map((msg) => {
-                  const isCurrentUser = msg.sender.id === supabase.auth.getUser().then(res => res.data.user?.id);
-                  return (
+                {messages?.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${
+                      msg.sender.id === currentUserId ? "justify-end" : "justify-start"
+                    }`}
+                  >
                     <div
-                      key={msg.id}
-                      className={`flex ${
-                        isCurrentUser ? "justify-end" : "justify-start"
-                      }`}
+                      className={`max-w-[70%] ${
+                        msg.sender.id === currentUserId
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      } rounded-lg p-3`}
                     >
-                      <div
-                        className={`max-w-[70%] ${
-                          isCurrentUser
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
-                        } rounded-lg p-3`}
-                      >
-                        <p>{msg.content}</p>
-                        <span className="text-xs opacity-70">
-                          {format(new Date(msg.created_at), 'HH:mm')}
-                        </span>
-                      </div>
+                      <p>{msg.content}</p>
+                      <span className="text-xs opacity-70">
+                        {format(new Date(msg.created_at), 'HH:mm')}
+                      </span>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </ScrollArea>
 
