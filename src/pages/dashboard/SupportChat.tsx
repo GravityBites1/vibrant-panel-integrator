@@ -67,14 +67,20 @@ export default function SupportChat() {
     }
 
     // Transform the data to match ChatRoom type
-    const transformedRooms = data.map(room => ({
-      ...room,
-      metadata: {
-        title: room.metadata?.title || 'Support Chat',
-        members_count: room.metadata?.members_count || 2,
-        online_count: room.metadata?.online_count || 1
-      }
-    })) as ChatRoom[];
+    const transformedRooms = data.map(room => {
+      const metadata = typeof room.metadata === 'string' 
+        ? JSON.parse(room.metadata) 
+        : (room.metadata as Record<string, any> || {});
+
+      return {
+        ...room,
+        metadata: {
+          title: metadata?.title || 'Support Chat',
+          members_count: metadata?.members_count || 2,
+          online_count: metadata?.online_count || 1
+        }
+      };
+    }) as ChatRoom[];
 
     setChatRooms(transformedRooms);
   };
