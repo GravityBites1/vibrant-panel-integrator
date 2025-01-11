@@ -3315,8 +3315,10 @@ export type Database = {
       product_size_variants: {
         Row: {
           created_at: string | null
+          group_name: Database["public"]["Enums"]["size_group"]
           id: string
           is_available: boolean | null
+          is_default: boolean
           menu_item_id: string | null
           name: string
           price_adjustment: number
@@ -3325,8 +3327,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          group_name?: Database["public"]["Enums"]["size_group"]
           id?: string
           is_available?: boolean | null
+          is_default?: boolean
           menu_item_id?: string | null
           name: string
           price_adjustment?: number
@@ -3335,8 +3339,10 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          group_name?: Database["public"]["Enums"]["size_group"]
           id?: string
           is_available?: boolean | null
+          is_default?: boolean
           menu_item_id?: string | null
           name?: string
           price_adjustment?: number
@@ -9093,6 +9099,7 @@ export type Database = {
         | "buy_one_get_one"
         | "free_item"
       question_type: "multiple_choice" | "rating" | "text" | "boolean" | "scale"
+      size_group: "regular" | "medium" | "large"
       store_notification_type: "new_order" | "payout" | "rating" | "low_stock"
       store_registration_status:
         | "pending"
