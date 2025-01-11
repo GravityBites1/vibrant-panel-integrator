@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 // Define the allowed store types
 type StoreType = "restaurant" | "grocery" | "pet_food" | "beverages" | "other";
@@ -30,6 +31,19 @@ const Categories = () => {
     gst_rate: 0,
     points_rate: 0,
     points_expiry_days: 30
+  });
+
+  // Fetch total categories count
+  const { data: categoriesCount } = useQuery({
+    queryKey: ['categoriesCount'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("store_categories")
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      return count || 0;
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,8 +117,11 @@ const Categories = () => {
   return (
     <div className="p-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Add New Category</CardTitle>
+          <div className="text-sm text-muted-foreground">
+            Total Categories: {categoriesCount || 0}
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
