@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -8,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { NotificationChannels, NotificationTypes, UserSettings, NotificationPreferences } from "@/types/settings";
 
 const formSchema = z.object({
   language: z.string(),
@@ -78,7 +79,7 @@ export default function Settings() {
   const loadSettings = async (uid: string) => {
     try {
       const { data: userSettings, error: settingsError } = await supabase
-        .from("user_settings")
+        .from<UserSettings>("user_settings")
         .select("*")
         .eq("user_id", uid)
         .single();
@@ -86,7 +87,7 @@ export default function Settings() {
       if (settingsError) throw settingsError;
 
       const { data: notifPrefs, error: notifError } = await supabase
-        .from("notification_preferences")
+        .from<NotificationPreferences>("notification_preferences")
         .select("*")
         .eq("user_id", uid)
         .single();
