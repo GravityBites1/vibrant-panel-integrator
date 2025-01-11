@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { store } from './store/store';
 import Index from "./pages/Index";
 import Orders from "./pages/dashboard/Orders";
+import OrderDetails from "./pages/dashboard/OrderDetails";
 import Users from "./pages/dashboard/Users";
 import Stores from "./pages/dashboard/Stores";
 import Campaigns from "./pages/dashboard/Campaigns";
@@ -34,6 +35,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />}>
               <Route path="/orders" element={<Orders />} />
+              <Route path="/orders/:id" element={<OrderDetails />} />
               <Route path="/users" element={<Users />} />
               <Route path="/stores" element={<Stores />} />
               <Route path="/campaigns" element={<Campaigns />} />
