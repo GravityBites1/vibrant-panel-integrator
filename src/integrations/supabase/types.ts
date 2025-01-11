@@ -1648,6 +1648,11 @@ export type Database = {
           aadhar_number: string | null
           aadhar_verified: boolean | null
           address: string | null
+          bank_account_holder_name: string | null
+          bank_account_number: string | null
+          bank_ifsc_code: string | null
+          bank_name: string | null
+          bank_verified: boolean | null
           city: string | null
           created_at: string | null
           date_of_birth: string | null
@@ -1673,6 +1678,11 @@ export type Database = {
           aadhar_number?: string | null
           aadhar_verified?: boolean | null
           address?: string | null
+          bank_account_holder_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc_code?: string | null
+          bank_name?: string | null
+          bank_verified?: boolean | null
           city?: string | null
           created_at?: string | null
           date_of_birth?: string | null
@@ -1698,6 +1708,11 @@ export type Database = {
           aadhar_number?: string | null
           aadhar_verified?: boolean | null
           address?: string | null
+          bank_account_holder_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc_code?: string | null
+          bank_name?: string | null
+          bank_verified?: boolean | null
           city?: string | null
           created_at?: string | null
           date_of_birth?: string | null
