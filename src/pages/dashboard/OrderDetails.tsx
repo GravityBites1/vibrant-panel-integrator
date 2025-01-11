@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Package, Truck, User } from "lucide-react";
+import { MapPin, Package, Truck, User, Store } from "lucide-react";
 
 interface Order {
   id: string;
@@ -16,6 +16,8 @@ interface Order {
   customer_name: string;
   delivery_partner_id: string;
   delivery_instructions: string;
+  store_name?: string;
+  store_address?: string;
 }
 
 // Demo data with valid UUID
@@ -31,7 +33,9 @@ const demoOrders: Record<string, Order> = {
     delivery_address: "123 Main St, City",
     customer_name: "John Doe",
     delivery_partner_id: "c9d6c879-df6d-4d6c-8e6b-e5eafb6d2d4d",
-    delivery_instructions: "Leave at door"
+    delivery_instructions: "Leave at door",
+    store_name: "Pizza Palace",
+    store_address: "789 Restaurant Row, Downtown"
   },
   "2": {
     id: "550e8400-e29b-41d4-a716-446655440001",
@@ -44,7 +48,9 @@ const demoOrders: Record<string, Order> = {
     delivery_address: "456 Oak St, City",
     customer_name: "Jane Smith",
     delivery_partner_id: "c9d6c879-df6d-4d6c-8e6b-e5eafb6d2d4e",
-    delivery_instructions: "Call upon arrival"
+    delivery_instructions: "Call upon arrival",
+    store_name: "Burger Bistro",
+    store_address: "321 Food Court Ave, Uptown"
   }
 };
 
@@ -63,12 +69,16 @@ export default function OrderDetails() {
       // Fallback to real API call if no demo data
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select('*, stores(name, address)')
         .eq('id', id)
         .single();
       
       if (error) throw error;
-      return data;
+      return {
+        ...data,
+        store_name: data.stores?.name,
+        store_address: data.stores?.address
+      };
     }
   });
 
@@ -118,6 +128,17 @@ export default function OrderDetails() {
           {/* Order Details */}
           <div className="space-y-6">
             <Card className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <Store className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <div className="text-sm text-muted-foreground">Store</div>
+                  <div className="font-semibold">{order.store_name}</div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {order.store_address}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-3">
                 <User className="w-5 h-5 text-muted-foreground" />
                 <div>
