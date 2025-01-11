@@ -1,161 +1,190 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { format } from "date-fns";
-import { Send, FileIcon, Phone, MoreVertical, Search, Users } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { 
+  Search, 
+  Phone, 
+  MoreVertical, 
+  X, 
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
+  Video,
+  File,
+  Link as LinkIcon,
+  Mic,
+  Users,
+  Send
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ChatMessage {
+  id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  sender: {
+    full_name: string;
+    avatar_url?: string;
+  };
+}
 
 interface ChatRoom {
   id: string;
+  user_id: string;
   status: string;
   last_message_at: string;
   metadata: {
-    last_message?: string;
+    title: string;
+    members_count: number;
+    online_count: number;
   };
   user: {
     id: string;
     full_name: string;
     email: string;
-  }
-}
-
-interface ChatMessage {
-  id: string;
-  content: string;
-  created_at: string;
-  sender: {
-    id: string;
-    full_name: string;
-    email: string;
   };
-  attachments: string[];
 }
 
-const SupportChat = () => {
-  const [message, setMessage] = useState("");
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+export default function SupportChat() {
+  const { toast } = useToast();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [showFiles, setShowFiles] = useState(true);
+  const [showMembers, setShowMembers] = useState(true);
 
   useEffect(() => {
-    // Get current user ID on component mount
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
-    };
-    getCurrentUser();
-  }, []);
-
-  const { data: chats, isLoading: chatsLoading } = useQuery({
-    queryKey: ['chat_rooms'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('chat_rooms')
-        .select(`
-          id,
-          status,
-          last_message_at,
-          metadata,
-          user:user_id (
-            id,
-            full_name,
-            email
-          )
-        `)
-        .order('last_message_at', { ascending: false });
-
-      if (error) throw error;
-      return data as ChatRoom[];
+    fetchChatRooms();
+    if (selectedRoom) {
+      fetchMessages(selectedRoom.id);
     }
-  });
+  }, [selectedRoom]);
 
-  const { data: messages, isLoading: messagesLoading } = useQuery({
-    queryKey: ['chat_messages', selectedChat],
-    queryFn: async () => {
-      if (!selectedChat) return [];
-      
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select(`
+  const fetchChatRooms = async () => {
+    const { data, error } = await supabase
+      .from('chat_rooms')
+      .select(`
+        id,
+        status,
+        last_message_at,
+        metadata,
+        user:user_id (
           id,
-          content,
-          created_at,
-          sender:sender_id (
-            id,
-            full_name,
-            email
-          ),
-          attachments
-        `)
-        .eq('room_id', selectedChat)
-        .order('created_at', { ascending: true });
+          full_name,
+          email
+        )
+      `)
+      .order('last_message_at', { ascending: false });
 
-      if (error) throw error;
-      return data as ChatMessage[];
-    },
-    enabled: !!selectedChat
-  });
+    if (error) {
+      toast({
+        title: "Error fetching chat rooms",
+        description: error.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setChatRooms(data as unknown as ChatRoom[]);
+  };
+
+  const fetchMessages = async (roomId: string) => {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select(`
+        id,
+        sender_id,
+        content,
+        created_at,
+        sender:profiles!chat_messages_sender_id_fkey (
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      toast({
+        title: "Error fetching messages",
+        description: error.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setMessages(data as ChatMessage[]);
+  };
 
   const sendMessage = async () => {
-    if (!message.trim() || !selectedChat || !currentUserId) return;
+    if (!selectedRoom || !newMessage.trim()) return;
 
     const { error } = await supabase
       .from('chat_messages')
       .insert({
-        room_id: selectedChat,
-        content: message,
-        sender_id: currentUserId
+        room_id: selectedRoom.id,
+        content: newMessage,
+        sender_id: supabase.auth.getUser()
       });
 
-    if (!error) {
-      setMessage("");
+    if (error) {
+      toast({
+        title: "Error sending message",
+        description: error.message,
+        variant: "destructive"
+      });
+      return;
     }
+
+    setNewMessage("");
+    fetchMessages(selectedRoom.id);
   };
 
   return (
-    <div className="flex h-[calc(100vh-120px)]">
-      {/* Left Sidebar - Chat List */}
-      <div className="w-80 border-r bg-background">
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Support Chat</h2>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </div>
+    <div className="flex h-[calc(100vh-4rem)] bg-background">
+      {/* Chat List Sidebar */}
+      <div className="w-80 border-r">
+        <div className="p-4">
           <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search chats..." className="pl-8" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search chats..."
+              className="pl-9"
+            />
           </div>
         </div>
-        <ScrollArea className="h-[calc(100vh-200px)]">
-          {chats?.map((chat) => (
+        <ScrollArea className="h-[calc(100vh-8rem)]">
+          {chatRooms.map((room) => (
             <div
-              key={chat.id}
-              onClick={() => setSelectedChat(chat.id)}
+              key={room.id}
               className={`p-4 cursor-pointer hover:bg-accent ${
-                selectedChat === chat.id ? "bg-accent" : ""
+                selectedRoom?.id === room.id ? "bg-accent" : ""
               }`}
+              onClick={() => setSelectedRoom(room)}
             >
               <div className="flex items-center gap-3">
                 <Avatar>
-                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${chat.user.id}`} />
-                  <AvatarFallback>
-                    {chat.user.full_name?.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
+                  <AvatarImage src={`https://avatar.vercel.sh/${room.user.id}`} />
+                  <AvatarFallback>{room.user.full_name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center">
-                    <p className="font-medium truncate">{chat.user.full_name}</p>
+                    <p className="font-medium truncate">{room.metadata.title}</p>
                     <span className="text-xs text-muted-foreground">
-                      {chat.last_message_at && format(new Date(chat.last_message_at), 'HH:mm')}
+                      {new Date(room.last_message_at).toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground truncate">
-                    {chat.metadata?.last_message || "No messages yet"}
+                    {room.status}
                   </p>
                 </div>
               </div>
@@ -166,83 +195,74 @@ const SupportChat = () => {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
-        {selectedChat ? (
+        {selectedRoom ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b bg-background">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${
-                      chats?.find(c => c.id === selectedChat)?.user.id
-                    }`} />
-                    <AvatarFallback>
-                      {chats?.find(c => c.id === selectedChat)?.user.full_name
-                        ?.split(' ')
-                        .map(n => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-medium">
-                      {chats?.find(c => c.id === selectedChat)?.user.full_name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {chats?.find(c => c.id === selectedChat)?.status}
-                    </p>
-                  </div>
+            <div className="p-4 border-b flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div>
+                  <h2 className="font-semibold">{selectedRoom.metadata.title}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedRoom.metadata.members_count} members, {selectedRoom.metadata.online_count} online
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon">
-                    <Phone className="h-5 w-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <FileIcon className="h-5 w-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Users className="h-5 w-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon">
+                  <Phone className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
               </div>
             </div>
 
             {/* Messages Area */}
             <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messages?.map((msg) => (
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-3 mb-4 ${
+                    message.sender_id === supabase.auth.getUser()
+                      ? "flex-row-reverse"
+                      : ""
+                  }`}
+                >
+                  <Avatar>
+                    <AvatarImage src={message.sender.avatar_url} />
+                    <AvatarFallback>{message.sender.full_name[0]}</AvatarFallback>
+                  </Avatar>
                   <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.sender.id === currentUserId ? "justify-end" : "justify-start"
+                    className={`flex flex-col ${
+                      message.sender_id === supabase.auth.getUser()
+                        ? "items-end"
+                        : ""
                     }`}
                   >
-                    <div
-                      className={`max-w-[70%] ${
-                        msg.sender.id === currentUserId
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      } rounded-lg p-3`}
-                    >
-                      <p>{msg.content}</p>
-                      <span className="text-xs opacity-70">
-                        {format(new Date(msg.created_at), 'HH:mm')}
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{message.sender.full_name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(message.created_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </span>
                     </div>
+                    <div className="mt-1 bg-accent rounded-lg p-3">
+                      <p>{message.content}</p>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </ScrollArea>
 
             {/* Message Input */}
-            <div className="p-4 border-t bg-background">
+            <div className="p-4 border-t">
               <div className="flex items-center gap-2">
                 <Input
                   placeholder="Type a message..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 />
                 <Button onClick={sendMessage}>
@@ -258,44 +278,107 @@ const SupportChat = () => {
         )}
       </div>
 
-      {/* Right Sidebar - Group Info */}
-      <div className="w-80 border-l bg-background p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Chat Info</h3>
+      {/* Info Sidebar */}
+      <div className="w-80 border-l">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h3 className="font-semibold">Group Info</h3>
           <Button variant="ghost" size="icon">
-            <MoreVertical className="h-5 w-5" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
-        {selectedChat && (
-          <div className="space-y-6">
-            <div>
-              <h4 className="text-sm font-medium mb-2">Attachments</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {messages?.filter(m => Array.isArray(m.attachments) && m.attachments.length > 0)
-                  .slice(0, 4)
-                  .map((msg, i) => (
-                    <div key={i} className="aspect-square bg-muted rounded-lg" />
-                  ))}
-              </div>
+        <div className="p-4">
+          {/* Files Section */}
+          <div className="mb-6">
+            <div
+              className="flex items-center justify-between mb-2 cursor-pointer"
+              onClick={() => setShowFiles(!showFiles)}
+            >
+              <h4 className="font-medium">Files</h4>
+              {showFiles ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
             </div>
-            <div>
-              <h4 className="text-sm font-medium mb-2">Shared Files</h4>
-              <div className="space-y-2">
-                {messages?.filter(m => Array.isArray(m.attachments) && m.attachments.length > 0)
-                  .slice(0, 3)
-                  .map((msg, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <FileIcon className="h-4 w-4" />
-                      <span className="text-sm">Document {i + 1}</span>
-                    </div>
-                  ))}
+            {showFiles && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    <span>265 photos</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    <span>13 videos</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <File className="h-4 w-4" />
+                    <span>378 files</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Mic className="h-4 w-4" />
+                    <span>21 audio files</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4" />
+                    <span>45 shared links</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        )}
+
+          {/* Members Section */}
+          <div>
+            <div
+              className="flex items-center justify-between mb-2 cursor-pointer"
+              onClick={() => setShowMembers(!showMembers)}
+            >
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <h4 className="font-medium">23 members</h4>
+              </div>
+              {showMembers ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </div>
+            {showMembers && (
+              <ScrollArea className="h-[200px]">
+                {/* Sample members - replace with actual data */}
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 mb-3">
+                    <Avatar>
+                      <AvatarImage src={`https://avatar.vercel.sh/${i}`} />
+                      <AvatarFallback>U{i}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">User Name {i + 1}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {i === 0 ? "admin" : "member"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </ScrollArea>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default SupportChat;
+}
