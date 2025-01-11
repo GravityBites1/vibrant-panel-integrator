@@ -9,7 +9,6 @@ const DeliveryPartners = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'delivery_partner')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
