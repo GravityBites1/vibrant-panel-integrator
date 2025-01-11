@@ -1,35 +1,54 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Package, Clock, DollarSign } from "lucide-react";
 
-interface Order {
-  id: string;
-  order_number: string;
-  customer_name: string;
-  total_amount: number;
-  status: string;
-  created_at: string;
-}
+const demoOrders = [
+  {
+    id: "1",
+    order_number: "ORD001",
+    customer_name: "John Doe",
+    total_amount: 49.99,
+    status: "delivered",
+    created_at: "2024-03-15T10:30:00Z"
+  },
+  {
+    id: "2",
+    order_number: "ORD002",
+    customer_name: "Jane Smith",
+    total_amount: 75.50,
+    status: "pending",
+    created_at: "2024-03-15T11:45:00Z"
+  },
+  {
+    id: "3",
+    order_number: "ORD003",
+    customer_name: "Mike Johnson",
+    total_amount: 32.25,
+    status: "cancelled",
+    created_at: "2024-03-15T09:15:00Z"
+  },
+  {
+    id: "4",
+    order_number: "ORD004",
+    customer_name: "Sarah Williams",
+    total_amount: 128.75,
+    status: "delivered",
+    created_at: "2024-03-15T13:20:00Z"
+  },
+  {
+    id: "5",
+    order_number: "ORD005",
+    customer_name: "Robert Brown",
+    total_amount: 95.00,
+    status: "pending",
+    created_at: "2024-03-15T14:10:00Z"
+  }
+];
 
 export default function Orders() {
   const navigate = useNavigate();
-
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['orders'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    }
-  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -41,29 +60,6 @@ export default function Orders() {
         return 'bg-blue-100 text-blue-800';
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <Card>
-          <div className="p-4">
-            <div className="flex items-center space-x-4 mb-4">
-              <Package className="h-6 w-6 text-gray-400" />
-              <h2 className="text-2xl font-semibold">Orders</h2>
-            </div>
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded mb-4"></div>
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-12 bg-gray-100 rounded"></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6">
@@ -103,7 +99,7 @@ export default function Orders() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders?.map((order) => (
+              {demoOrders.map((order) => (
                 <TableRow 
                   key={order.id}
                   className="cursor-pointer hover:bg-muted"
