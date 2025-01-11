@@ -79,17 +79,17 @@ export default function Settings() {
   const loadSettings = async (uid: string) => {
     try {
       const { data: userSettings, error: settingsError } = await supabase
-        .from<UserSettings>("user_settings")
-        .select("*")
-        .eq("user_id", uid)
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', uid)
         .single();
 
       if (settingsError) throw settingsError;
 
       const { data: notifPrefs, error: notifError } = await supabase
-        .from<NotificationPreferences>("notification_preferences")
-        .select("*")
-        .eq("user_id", uid)
+        .from('notification_preferences')
+        .select('*')
+        .eq('user_id', uid)
         .single();
 
       if (notifError) throw notifError;

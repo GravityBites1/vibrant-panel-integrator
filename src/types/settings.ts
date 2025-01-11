@@ -17,7 +17,7 @@ export interface UserSettings {
   language: string;
   currency: string;
   theme: string;
-  delivery_preferences: Json;
+  delivery_preferences: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   max_concurrent_orders: number;
