@@ -70,11 +70,19 @@ export default function Settings() {
       if (error) throw error;
 
       if (settings) {
+        // Parse delivery_preferences if it's a string or ensure it's the correct shape
+        const delivery_preferences = typeof settings.delivery_preferences === 'string' 
+          ? JSON.parse(settings.delivery_preferences)
+          : settings.delivery_preferences || {
+              defaultTip: 0,
+              noContactDelivery: false
+            };
+
         form.reset({
           language: settings.language,
           currency: settings.currency,
           theme: settings.theme,
-          delivery_preferences: settings.delivery_preferences,
+          delivery_preferences,
           max_concurrent_orders: settings.max_concurrent_orders,
           auto_accept_orders: settings.auto_accept_orders,
           preparation_buffer_time: settings.preparation_buffer_time,
