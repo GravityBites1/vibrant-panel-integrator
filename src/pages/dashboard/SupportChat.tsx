@@ -41,6 +41,7 @@ export default function SupportChat() {
         status,
         last_message_at,
         metadata,
+        user_id,
         user:user_id (
           id,
           full_name,
