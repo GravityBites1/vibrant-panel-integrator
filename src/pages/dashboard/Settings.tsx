@@ -95,8 +95,8 @@ export default function Settings() {
       if (notifError) throw notifError;
 
       if (userSettings) {
-        const channels = notifPrefs?.channels as NotificationChannels;
-        const types = notifPrefs?.types as NotificationTypes;
+        const channels = notifPrefs?.channels as unknown as NotificationChannels | undefined;
+        const types = notifPrefs?.types as unknown as NotificationTypes | undefined;
 
         form.reset({
           language: userSettings.language,
