@@ -9,6 +9,32 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Send, FileIcon, Phone, MoreVertical, Search, Users } from "lucide-react";
 
+interface ChatRoom {
+  id: string;
+  status: string;
+  last_message_at: string;
+  metadata: {
+    last_message?: string;
+  };
+  user: {
+    id: string;
+    full_name: string;
+    email: string;
+  }
+}
+
+interface ChatMessage {
+  id: string;
+  content: string;
+  created_at: string;
+  sender: {
+    id: string;
+    full_name: string;
+    email: string;
+  };
+  attachments: string[];
+}
+
 const SupportChat = () => {
   const [message, setMessage] = useState("");
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
@@ -32,7 +58,7 @@ const SupportChat = () => {
         .order('last_message_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as ChatRoom[];
     }
   });
 
@@ -58,7 +84,7 @@ const SupportChat = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as ChatMessage[];
     },
     enabled: !!selectedChat
   });
@@ -66,12 +92,17 @@ const SupportChat = () => {
   const sendMessage = async () => {
     if (!message.trim() || !selectedChat) return;
 
+    const user = await supabase.auth.getUser();
+    const userId = user.data.user?.id;
+
+    if (!userId) return;
+
     const { error } = await supabase
       .from('chat_messages')
       .insert({
         room_id: selectedChat,
         content: message,
-        sender_id: (await supabase.auth.getUser()).data.user?.id
+        sender_id: userId
       });
 
     if (!error) {
@@ -176,29 +207,30 @@ const SupportChat = () => {
             {/* Messages Area */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages?.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.sender.id === (supabase.auth.getUser())?.data?.user?.id
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
+                {messages?.map((msg) => {
+                  const isCurrentUser = msg.sender.id === supabase.auth.getUser().then(res => res.data.user?.id);
+                  return (
                     <div
-                      className={`max-w-[70%] ${
-                        msg.sender.id === (supabase.auth.getUser())?.data?.user?.id
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      } rounded-lg p-3`}
+                      key={msg.id}
+                      className={`flex ${
+                        isCurrentUser ? "justify-end" : "justify-start"
+                      }`}
                     >
-                      <p>{msg.content}</p>
-                      <span className="text-xs opacity-70">
-                        {format(new Date(msg.created_at), 'HH:mm')}
-                      </span>
+                      <div
+                        className={`max-w-[70%] ${
+                          isCurrentUser
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        } rounded-lg p-3`}
+                      >
+                        <p>{msg.content}</p>
+                        <span className="text-xs opacity-70">
+                          {format(new Date(msg.created_at), 'HH:mm')}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
 
@@ -237,7 +269,7 @@ const SupportChat = () => {
             <div>
               <h4 className="text-sm font-medium mb-2">Attachments</h4>
               <div className="grid grid-cols-2 gap-2">
-                {messages?.filter(m => m.attachments?.length > 0)
+                {messages?.filter(m => Array.isArray(m.attachments) && m.attachments.length > 0)
                   .slice(0, 4)
                   .map((msg, i) => (
                     <div key={i} className="aspect-square bg-muted rounded-lg" />
@@ -247,7 +279,7 @@ const SupportChat = () => {
             <div>
               <h4 className="text-sm font-medium mb-2">Shared Files</h4>
               <div className="space-y-2">
-                {messages?.filter(m => m.attachments?.length > 0)
+                {messages?.filter(m => Array.isArray(m.attachments) && m.attachments.length > 0)
                   .slice(0, 3)
                   .map((msg, i) => (
                     <div key={i} className="flex items-center gap-2">
