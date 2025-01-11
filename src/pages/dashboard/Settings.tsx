@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { NotificationChannels, NotificationTypes, UserSettings, NotificationPreferences } from "@/types/settings";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   language: z.string(),
@@ -32,8 +33,6 @@ const formSchema = z.object({
     delivery_radius: z.number().min(1).max(50)
   })
 });
-
-type SettingsFormValues = z.infer<typeof formSchema>;
 
 export default function Settings() {
   const [loading, setLoading] = useState(true);
@@ -188,7 +187,11 @@ export default function Settings() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
