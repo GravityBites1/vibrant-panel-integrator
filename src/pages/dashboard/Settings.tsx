@@ -95,15 +95,18 @@ export default function Settings() {
       if (notifError) throw notifError;
 
       if (userSettings) {
+        const channels = notifPrefs?.channels as NotificationChannels;
+        const types = notifPrefs?.types as NotificationTypes;
+
         form.reset({
           language: userSettings.language,
           currency: userSettings.currency,
           theme: userSettings.theme,
           notification_preferences: {
-            email_enabled: notifPrefs?.channels?.email ?? true,
-            push_enabled: notifPrefs?.channels?.push ?? true,
-            sms_enabled: notifPrefs?.channels?.sms ?? false,
-            notification_types: notifPrefs?.types ?? {
+            email_enabled: channels?.email ?? true,
+            push_enabled: channels?.push ?? true,
+            sms_enabled: channels?.sms ?? false,
+            notification_types: types ?? {
               payout: true,
               rating: true,
               low_stock: true,

@@ -5,10 +5,10 @@ export interface NotificationChannels {
 }
 
 export interface NotificationTypes {
-  new_order: boolean;
   payout: boolean;
   rating: boolean;
   low_stock: boolean;
+  new_order: boolean;
 }
 
 export interface UserSettings {
@@ -17,9 +17,6 @@ export interface UserSettings {
   language: string;
   currency: string;
   theme: string;
-  delivery_preferences: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
   max_concurrent_orders: number;
   auto_accept_orders: boolean;
   preparation_buffer_time: number;
@@ -31,6 +28,4 @@ export interface NotificationPreferences {
   user_id: string;
   channels: NotificationChannels;
   types: NotificationTypes;
-  created_at: string;
-  updated_at: string;
 }
