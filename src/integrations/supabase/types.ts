@@ -1800,6 +1800,108 @@ export type Database = {
           },
         ]
       }
+      lead_partner_support_messages: {
+        Row: {
+          attachments: Json | null
+          content: string
+          created_at: string | null
+          id: string
+          sender_id: string
+          status: Database["public"]["Enums"]["support_message_status"] | null
+          ticket_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          content: string
+          created_at?: string | null
+          id?: string
+          sender_id: string
+          status?: Database["public"]["Enums"]["support_message_status"] | null
+          ticket_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          sender_id?: string
+          status?: Database["public"]["Enums"]["support_message_status"] | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_partner_support_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_partner_support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "lead_partner_support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_partner_support_tickets: {
+        Row: {
+          admin_assigned_id: string | null
+          category: string
+          created_at: string | null
+          description: string
+          id: string
+          partner_id: string
+          priority: string
+          resolved_at: string | null
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          admin_assigned_id?: string | null
+          category?: string
+          created_at?: string | null
+          description: string
+          id?: string
+          partner_id: string
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          admin_assigned_id?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          partner_id?: string
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_partner_support_tickets_admin_assigned_id_fkey"
+            columns: ["admin_assigned_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_partner_support_tickets_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "lead_partner_onboarding"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_categories: {
         Row: {
           created_at: string | null
@@ -2960,6 +3062,7 @@ export type Database = {
           commission_rate: number
           created_at: string | null
           gst_rate: number
+          icon_url: string | null
           id: string
           name: string
           parent_id: string | null
@@ -2972,6 +3075,7 @@ export type Database = {
           commission_rate: number
           created_at?: string | null
           gst_rate: number
+          icon_url?: string | null
           id?: string
           name: string
           parent_id?: string | null
@@ -2984,6 +3088,7 @@ export type Database = {
           commission_rate?: number
           created_at?: string | null
           gst_rate?: number
+          icon_url?: string | null
           id?: string
           name?: string
           parent_id?: string | null
@@ -8940,6 +9045,7 @@ export type Database = {
         | "approved"
         | "rejected"
       store_type: "restaurant" | "grocery" | "pet_food" | "beverages" | "other"
+      support_message_status: "sent" | "delivered" | "read"
       tax_report_status: "generated" | "verified" | "filed" | "error"
       transaction_status: "pending" | "completed" | "failed" | "refunded"
       user_role:

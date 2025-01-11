@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { Pencil, Trash2, Upload } from "lucide-react";
 
 interface PlatformCategory {
   id: string;
@@ -19,6 +20,7 @@ interface PlatformCategory {
   gst_rate: number;
   points_rate: number;
   points_expiry_days: number | null;
+  icon_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -30,14 +32,18 @@ const formSchema = z.object({
   gst_rate: z.string().min(1, "GST rate is required"),
   points_rate: z.string().min(1, "Points rate is required"),
   points_expiry_days: z.string().optional(),
+  icon: z.instanceof(FileList).optional(),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function PlatformCategories() {
   const [categories, setCategories] = useState<PlatformCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<PlatformCategory | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -52,6 +58,19 @@ export default function PlatformCategories() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (editingCategory) {
+      form.reset({
+        name: editingCategory.name,
+        commission_rate: editingCategory.commission_rate.toString(),
+        platform_fee: editingCategory.platform_fee.toString(),
+        gst_rate: editingCategory.gst_rate.toString(),
+        points_rate: editingCategory.points_rate.toString(),
+        points_expiry_days: editingCategory.points_expiry_days?.toString() || "",
+      });
+    }
+  }, [editingCategory, form]);
 
   const fetchCategories = async () => {
     try {
@@ -74,47 +93,111 @@ export default function PlatformCategories() {
     }
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleDelete = async (id: string) => {
     try {
-      console.log("Submitting values:", values);
+      const { error } = await supabase
+        .from("platform_categories")
+        .delete()
+        .eq("id", id);
 
-      // Ensure all required fields are present and properly typed
-      const newCategory = {
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Platform category deleted successfully",
+      });
+
+      fetchCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete platform category",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (category: PlatformCategory) => {
+    setEditingCategory(category);
+    setIsDialogOpen(true);
+  };
+
+  const uploadIcon = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('platform_categories')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('platform_categories')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading icon:", error);
+      return null;
+    }
+  };
+
+  const onSubmit = async (values: FormValues) => {
+    try {
+      let iconUrl = editingCategory?.icon_url || null;
+
+      if (values.icon && values.icon.length > 0) {
+        iconUrl = await uploadIcon(values.icon[0]);
+      }
+
+      const categoryData = {
         name: values.name,
         commission_rate: Number(values.commission_rate),
         platform_fee: Number(values.platform_fee),
         gst_rate: Number(values.gst_rate),
         points_rate: Number(values.points_rate),
         points_expiry_days: values.points_expiry_days ? Number(values.points_expiry_days) : null,
+        icon_url: iconUrl,
       };
 
-      console.log("Formatted category:", newCategory);
+      if (editingCategory) {
+        const { error } = await supabase
+          .from("platform_categories")
+          .update(categoryData)
+          .eq("id", editingCategory.id);
 
-      const { data, error } = await supabase
-        .from("platform_categories")
-        .insert([newCategory]) // Note: Wrap in array for insert
-        .select();
+        if (error) throw error;
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
+        toast({
+          title: "Success",
+          description: "Platform category updated successfully",
+        });
+      } else {
+        const { error } = await supabase
+          .from("platform_categories")
+          .insert([categoryData]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Platform category created successfully",
+        });
       }
-
-      console.log("Insert response:", data);
-
-      toast({
-        title: "Success",
-        description: "Platform category created successfully",
-      });
 
       form.reset();
       setIsDialogOpen(false);
+      setEditingCategory(null);
       fetchCategories();
     } catch (error) {
-      console.error("Error creating category:", error);
+      console.error("Error saving category:", error);
       toast({
         title: "Error",
-        description: "Failed to create platform category",
+        description: "Failed to save platform category",
         variant: "destructive",
       });
     }
@@ -129,13 +212,19 @@ export default function PlatformCategories() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Platform Categories</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              setEditingCategory(null);
+              form.reset();
+            }
+          }}>
             <DialogTrigger asChild>
               <Button>Add Category</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Platform Category</DialogTitle>
+                <DialogTitle>{editingCategory ? 'Edit' : 'Add New'} Platform Category</DialogTitle>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -217,7 +306,34 @@ export default function PlatformCategories() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit">Create Category</Button>
+                  <FormField
+                    control={form.control}
+                    name="icon"
+                    render={({ field: { onChange, value, ...field } }) => (
+                      <FormItem>
+                        <FormLabel>Icon</FormLabel>
+                        <FormControl>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => onChange(e.target.files)}
+                              {...field}
+                            />
+                            {editingCategory?.icon_url && (
+                              <img 
+                                src={editingCategory.icon_url} 
+                                alt="Current icon" 
+                                className="w-8 h-8 object-cover"
+                              />
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit">{editingCategory ? 'Update' : 'Create'} Category</Button>
                 </form>
               </Form>
             </DialogContent>
@@ -227,23 +343,54 @@ export default function PlatformCategories() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Icon</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Commission Rate</TableHead>
                 <TableHead>Platform Fee</TableHead>
                 <TableHead>GST Rate</TableHead>
                 <TableHead>Points Rate</TableHead>
                 <TableHead>Points Expiry Days</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categories.map((category) => (
                 <TableRow key={category.id}>
+                  <TableCell>
+                    {category.icon_url ? (
+                      <img 
+                        src={category.icon_url} 
+                        alt={category.name} 
+                        className="w-8 h-8 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gray-200 rounded" />
+                    )}
+                  </TableCell>
                   <TableCell>{category.name}</TableCell>
                   <TableCell>{category.commission_rate}%</TableCell>
                   <TableCell>${category.platform_fee}</TableCell>
                   <TableCell>{category.gst_rate}%</TableCell>
                   <TableCell>{category.points_rate}</TableCell>
                   <TableCell>{category.points_expiry_days || 'N/A'}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleEdit(category)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDelete(category.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
