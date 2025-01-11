@@ -3362,6 +3362,7 @@ export type Database = {
       profiles: {
         Row: {
           account_locked: boolean | null
+          avatar_url: string | null
           created_at: string | null
           current_location: Json | null
           email: string
@@ -3381,6 +3382,7 @@ export type Database = {
         }
         Insert: {
           account_locked?: boolean | null
+          avatar_url?: string | null
           created_at?: string | null
           current_location?: Json | null
           email: string
@@ -3400,6 +3402,7 @@ export type Database = {
         }
         Update: {
           account_locked?: boolean | null
+          avatar_url?: string | null
           created_at?: string | null
           current_location?: Json | null
           email?: string

@@ -29,7 +29,7 @@ interface ChatMessage {
   created_at: string;
   sender: {
     full_name: string;
-    avatar_url?: string;
+    avatar_url?: string | null;
   };
 }
 
@@ -58,8 +58,18 @@ export default function SupportChat() {
   const [newMessage, setNewMessage] = useState("");
   const [showFiles, setShowFiles] = useState(true);
   const [showMembers, setShowMembers] = useState(true);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
 
   useEffect(() => {
+    // Get current user
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user.id);
+      }
+    };
+    getCurrentUser();
+
     fetchChatRooms();
     if (selectedRoom) {
       fetchMessages(selectedRoom.id);
@@ -91,7 +101,7 @@ export default function SupportChat() {
       return;
     }
 
-    setChatRooms(data as unknown as ChatRoom[]);
+    setChatRooms(data as ChatRoom[]);
   };
 
   const fetchMessages = async (roomId: string) => {
@@ -123,14 +133,14 @@ export default function SupportChat() {
   };
 
   const sendMessage = async () => {
-    if (!selectedRoom || !newMessage.trim()) return;
+    if (!selectedRoom || !newMessage.trim() || !currentUser) return;
 
     const { error } = await supabase
       .from('chat_messages')
       .insert({
         room_id: selectedRoom.id,
         content: newMessage,
-        sender_id: supabase.auth.getUser()
+        sender_id: currentUser
       });
 
     if (error) {
@@ -223,18 +233,18 @@ export default function SupportChat() {
                 <div
                   key={message.id}
                   className={`flex gap-3 mb-4 ${
-                    message.sender_id === supabase.auth.getUser()
+                    message.sender_id === currentUser
                       ? "flex-row-reverse"
                       : ""
                   }`}
                 >
                   <Avatar>
-                    <AvatarImage src={message.sender.avatar_url} />
+                    <AvatarImage src={message.sender.avatar_url || undefined} />
                     <AvatarFallback>{message.sender.full_name[0]}</AvatarFallback>
                   </Avatar>
                   <div
                     className={`flex flex-col ${
-                      message.sender_id === supabase.auth.getUser()
+                      message.sender_id === currentUser
                         ? "items-end"
                         : ""
                     }`}
