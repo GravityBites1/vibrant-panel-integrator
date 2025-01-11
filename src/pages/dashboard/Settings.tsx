@@ -34,6 +34,9 @@ const formSchema = z.object({
   })
 });
 
+// Define type from schema
+type SettingsFormValues = z.infer<typeof formSchema>;
+
 export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
