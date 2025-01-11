@@ -23,24 +23,16 @@ const formSchema = z.object({
       low_stock: z.boolean(),
       new_order: z.boolean()
     })
+  }),
+  backend_settings: z.object({
+    max_concurrent_orders: z.number().min(1).max(100),
+    auto_accept_orders: z.boolean(),
+    preparation_buffer_time: z.number().min(0).max(60),
+    delivery_radius: z.number().min(1).max(50)
   })
 });
 
 type SettingsFormValues = z.infer<typeof formSchema>;
-
-interface NotificationPreferences {
-  channels: {
-    email: boolean;
-    push: boolean;
-    sms: boolean;
-  };
-  types: {
-    payout: boolean;
-    rating: boolean;
-    low_stock: boolean;
-    new_order: boolean;
-  };
-}
 
 export default function Settings() {
   const [loading, setLoading] = useState(true);
@@ -62,6 +54,12 @@ export default function Settings() {
           low_stock: true,
           new_order: true
         }
+      },
+      backend_settings: {
+        max_concurrent_orders: 5,
+        auto_accept_orders: false,
+        preparation_buffer_time: 15,
+        delivery_radius: 10
       }
     }
   });
@@ -110,6 +108,12 @@ export default function Settings() {
               low_stock: true,
               new_order: true
             }
+          },
+          backend_settings: {
+            max_concurrent_orders: userSettings.max_concurrent_orders ?? 5,
+            auto_accept_orders: userSettings.auto_accept_orders ?? false,
+            preparation_buffer_time: userSettings.preparation_buffer_time ?? 15,
+            delivery_radius: userSettings.delivery_radius ?? 10
           }
         });
       }
@@ -136,13 +140,17 @@ export default function Settings() {
           user_id: userId,
           language: values.language,
           currency: values.currency,
-          theme: values.theme
+          theme: values.theme,
+          max_concurrent_orders: values.backend_settings.max_concurrent_orders,
+          auto_accept_orders: values.backend_settings.auto_accept_orders,
+          preparation_buffer_time: values.backend_settings.preparation_buffer_time,
+          delivery_radius: values.backend_settings.delivery_radius
         });
 
       if (settingsError) throw settingsError;
 
       // Update notification preferences
-      const notificationPrefs: NotificationPreferences = {
+      const notificationPrefs = {
         channels: {
           email: values.notification_preferences.email_enabled,
           push: values.notification_preferences.push_enabled,
@@ -249,6 +257,102 @@ export default function Settings() {
                         <SelectItem value="system">System</SelectItem>
                       </SelectContent>
                     </Select>
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Backend Settings</CardTitle>
+              <CardDescription>Configure operational parameters</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="backend_settings.max_concurrent_orders"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Maximum Concurrent Orders</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select max orders" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 10, 15, 20].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Maximum number of orders you can handle simultaneously</FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="backend_settings.auto_accept_orders"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div>
+                      <FormLabel>Auto Accept Orders</FormLabel>
+                      <FormDescription>Automatically accept incoming orders</FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="backend_settings.preparation_buffer_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preparation Buffer Time (minutes)</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select buffer time" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[5, 10, 15, 20, 30, 45, 60].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Additional time buffer for order preparation</FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="backend_settings.delivery_radius"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Delivery Radius (km)</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select delivery radius" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[1, 2, 3, 5, 7, 10, 15, 20, 25, 30, 40, 50].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Maximum delivery distance from your location</FormDescription>
                   </FormItem>
                 )}
               />
