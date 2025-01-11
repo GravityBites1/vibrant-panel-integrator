@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   language: z.string(),
@@ -30,6 +31,7 @@ type SettingsFormValues = z.infer<typeof formSchema>;
 export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
@@ -50,10 +52,21 @@ export default function Settings() {
 
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-        loadSettings(user.id);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserId(user.id);
+          await loadSettings(user.id);
+        }
+      } catch (error) {
+        console.error("Error getting current user:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load user data",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
     };
     getCurrentUser();
@@ -96,8 +109,6 @@ export default function Settings() {
         description: "Failed to load settings",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -105,6 +116,7 @@ export default function Settings() {
     if (!userId) return;
 
     try {
+      setSaving(true);
       const { error } = await supabase
         .from("user_settings")
         .upsert({
@@ -125,6 +137,8 @@ export default function Settings() {
         description: "Failed to save settings",
         variant: "destructive"
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -337,6 +351,11 @@ export default function Settings() {
               />
             </CardContent>
           </Card>
+
+          <Button type="submit" disabled={saving}>
+            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Changes
+          </Button>
         </form>
       </Form>
     </div>
