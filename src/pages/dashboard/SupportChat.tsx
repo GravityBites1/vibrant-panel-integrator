@@ -30,7 +30,14 @@ export default function SupportChat() {
     fetchChatRooms();
     if (selectedRoom) {
       fetchMessages(selectedRoom.id);
+      subscribeToMessages(selectedRoom.id);
     }
+
+    return () => {
+      if (selectedRoom) {
+        unsubscribeFromMessages(selectedRoom.id);
+      }
+    };
   }, [selectedRoom]);
 
   const fetchChatRooms = async () => {
@@ -42,7 +49,7 @@ export default function SupportChat() {
         last_message_at,
         metadata,
         user_id,
-        user:user_id (
+        user:profiles!chat_rooms_user_id_fkey (
           id,
           full_name,
           email
@@ -59,7 +66,17 @@ export default function SupportChat() {
       return;
     }
 
-    setChatRooms(data as ChatRoom[]);
+    // Transform the data to match ChatRoom type
+    const transformedRooms = data.map(room => ({
+      ...room,
+      metadata: {
+        title: room.metadata?.title || 'Support Chat',
+        members_count: room.metadata?.members_count || 2,
+        online_count: room.metadata?.online_count || 1
+      }
+    })) as ChatRoom[];
+
+    setChatRooms(transformedRooms);
   };
 
   const fetchMessages = async (roomId: string) => {
@@ -90,6 +107,33 @@ export default function SupportChat() {
     setMessages(data as ChatMessage[]);
   };
 
+  const subscribeToMessages = (roomId: string) => {
+    const channel = supabase
+      .channel(`room:${roomId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `room_id=eq.${roomId}`
+        },
+        (payload) => {
+          console.log('New message received:', payload);
+          const newMessage = payload.new as ChatMessage;
+          setMessages(prev => [...prev, newMessage]);
+        }
+      )
+      .subscribe();
+
+    console.log(`Subscribed to messages in room ${roomId}`);
+  };
+
+  const unsubscribeFromMessages = (roomId: string) => {
+    supabase.channel(`room:${roomId}`).unsubscribe();
+    console.log(`Unsubscribed from messages in room ${roomId}`);
+  };
+
   const sendMessage = async () => {
     if (!selectedRoom || !newMessage.trim() || !currentUser) return;
 
@@ -110,8 +154,13 @@ export default function SupportChat() {
       return;
     }
 
+    // Update last_message_at in chat_room
+    await supabase
+      .from('chat_rooms')
+      .update({ last_message_at: new Date().toISOString() })
+      .eq('id', selectedRoom.id);
+
     setNewMessage("");
-    fetchMessages(selectedRoom.id);
   };
 
   return (
