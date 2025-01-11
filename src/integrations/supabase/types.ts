@@ -5347,31 +5347,43 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          auto_accept_orders: boolean | null
           created_at: string | null
           currency: string
           delivery_preferences: Json | null
+          delivery_radius: number | null
           id: string
           language: string
+          max_concurrent_orders: number | null
+          preparation_buffer_time: number | null
           theme: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          auto_accept_orders?: boolean | null
           created_at?: string | null
           currency?: string
           delivery_preferences?: Json | null
+          delivery_radius?: number | null
           id?: string
           language?: string
+          max_concurrent_orders?: number | null
+          preparation_buffer_time?: number | null
           theme?: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          auto_accept_orders?: boolean | null
           created_at?: string | null
           currency?: string
           delivery_preferences?: Json | null
+          delivery_radius?: number | null
           id?: string
           language?: string
+          max_concurrent_orders?: number | null
+          preparation_buffer_time?: number | null
           theme?: string
           updated_at?: string | null
           user_id?: string
