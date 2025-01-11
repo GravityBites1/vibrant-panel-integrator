@@ -3312,6 +3312,47 @@ export type Database = {
           },
         ]
       }
+      product_size_variants: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_available: boolean | null
+          menu_item_id: string | null
+          name: string
+          price_adjustment: number
+          stock_quantity: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          menu_item_id?: string | null
+          name: string
+          price_adjustment?: number
+          stock_quantity?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          menu_item_id?: string | null
+          name?: string
+          price_adjustment?: number
+          stock_quantity?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_size_variants_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_locked: boolean | null
