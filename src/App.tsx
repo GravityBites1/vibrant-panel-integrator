@@ -12,6 +12,7 @@ import Stores from "./pages/dashboard/Stores";
 import Campaigns from "./pages/dashboard/Campaigns";
 import Categories from "./pages/dashboard/Categories";
 import PlatformCategories from "./pages/dashboard/PlatformCategories";
+import Settings from "./pages/dashboard/Settings";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/platform-categories" element={<PlatformCategories />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
           </Routes>
         </BrowserRouter>
