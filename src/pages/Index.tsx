@@ -7,7 +7,8 @@ import {
 } from 'recharts';
 import { 
   LayoutDashboard, Users, ShoppingCart, Settings, Menu, 
-  LogOut, Sun, Moon, Loader, Store, LineChart as CampaignIcon, List 
+  LogOut, Sun, Moon, Loader, Store, LineChart as CampaignIcon, 
+  List, Tag, Star, Package, HeadphonesIcon, BarChart3, CreditCard, Bike 
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link, Outlet, useLocation } from "react-router-dom";
@@ -37,6 +38,13 @@ const Index = () => {
     { icon: CampaignIcon, label: 'Campaigns', path: '/campaigns' },
     { icon: List, label: 'Categories', path: '/categories' },
     { icon: List, label: 'Platform Categories', path: '/platform-categories' },
+    { icon: Tag, label: 'Promotions', path: '/promotions' },
+    { icon: Star, label: 'Reviews', path: '/reviews' },
+    { icon: Package, label: 'Inventory', path: '/inventory' },
+    { icon: HeadphonesIcon, label: 'Support Tickets', path: '/support-tickets' },
+    { icon: BarChart3, label: 'Reports', path: '/reports' },
+    { icon: CreditCard, label: 'Payments', path: '/payments' },
+    { icon: Bike, label: 'Delivery Partners', path: '/delivery-partners' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
