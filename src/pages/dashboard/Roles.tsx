@@ -5,6 +5,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define the shape of data from Supabase
+interface SupabaseUserRole {
+  id: string;
+  user_id: string;
+  role: 'admin' | 'restaurant' | 'customer' | 'delivery_partner' | 'lead_partner';
+  created_at: string;
+  updated_at: string;
+  user: {
+    email: string | null;
+    full_name: string | null;
+  } | null;
+}
+
+// Define our validated UserRole type
 interface UserRole {
   id: string;
   user_id: string;
@@ -40,14 +54,13 @@ export default function Roles() {
 
       if (error) throw error;
 
-      // Type guard to ensure data matches our interface
-      const validRoles = data?.filter((role): role is UserRole => 
+      // Type guard to validate the data
+      const validRoles = (data as SupabaseUserRole[])?.filter((role): role is UserRole => 
         role && 
         role.user && 
-        typeof role.user === 'object' && 
-        'email' in role.user && 
-        typeof role.user.email === 'string'
-      ) || [];
+        typeof role.user === 'object' &&
+        role.user.email !== null
+      );
 
       setRoles(validRoles);
     } catch (error) {
@@ -112,8 +125,8 @@ export default function Roles() {
             <TableBody>
               {roles.map((role) => (
                 <TableRow key={role.id}>
-                  <TableCell>{role.user?.full_name || 'N/A'}</TableCell>
-                  <TableCell>{role.user?.email}</TableCell>
+                  <TableCell>{role.user.full_name || 'N/A'}</TableCell>
+                  <TableCell>{role.user.email}</TableCell>
                   <TableCell>{role.role}</TableCell>
                   <TableCell>
                     <Select
