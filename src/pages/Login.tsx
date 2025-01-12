@@ -25,6 +25,7 @@ const Login = () => {
 
   const loginWithDemo = async () => {
     try {
+      console.log("Attempting demo login...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: "demo@admin.com",
         password: "demo1234",
