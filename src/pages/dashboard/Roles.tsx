@@ -55,14 +55,15 @@ export default function Roles() {
       if (error) throw error;
 
       // Type guard to validate the data
-      const validRoles = (data as SupabaseUserRole[])?.filter((role): role is UserRole => 
+      const validRoles = (data as unknown as SupabaseUserRole[])?.filter((role): role is UserRole => 
         role && 
         role.user && 
         typeof role.user === 'object' &&
-        role.user.email !== null
+        role.user.email !== null &&
+        'email' in role.user
       );
 
-      setRoles(validRoles);
+      setRoles(validRoles || []);
     } catch (error) {
       console.error('Error fetching roles:', error);
       toast({
