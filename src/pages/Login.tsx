@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,13 +22,49 @@ const Login = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const loginWithDemo = async () => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: "demo@admin.com",
+      password: "demo1234",
+    });
+
+    if (error) {
+      console.error("Error logging in with demo account:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Admin Panel</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertDescription className="text-sm">
+              Demo Credentials:
+              <br />
+              Email: demo@admin.com
+              <br />
+              Password: demo1234
+            </AlertDescription>
+          </Alert>
+          <Button 
+            className="w-full"
+            onClick={loginWithDemo}
+          >
+            Login with Demo Account
+          </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
           <Auth
             supabaseClient={supabase}
             appearance={{ theme: ThemeSupa }}
