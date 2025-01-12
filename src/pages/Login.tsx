@@ -6,6 +6,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -30,6 +31,11 @@ const Login = () => {
 
     if (error) {
       console.error("Error logging in with demo account:", error);
+      toast({
+        title: "Error",
+        description: "Invalid login credentials. Please make sure you have created the demo account in Supabase.",
+        variant: "destructive"
+      });
     }
   };
 
