@@ -23,6 +23,7 @@ import SupportChat from "./pages/dashboard/SupportChat";
 import Reports from "./pages/dashboard/Reports";
 import Payments from "./pages/dashboard/Payments";
 import DeliveryPartners from "./pages/dashboard/DeliveryPartners";
+import AddCity from "./pages/dashboard/AddCity";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/platform-categories" element={<PlatformCategories />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/radius-settings" element={<RadiusSettings />} />
+              <Route path="/add-city" element={<AddCity />} />
               <Route path="/promotions" element={<Promotions />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/inventory" element={<Inventory />} />
