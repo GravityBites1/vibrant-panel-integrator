@@ -30,7 +30,14 @@ export function RadiusPredictions({ cityId }: { cityId: string }) {
         .single();
 
       if (error) throw error;
-      return data as RadiusPrediction;
+      
+      // Type assertion to handle JSON metrics
+      const typedData = {
+        ...data,
+        metrics: data.metrics as RadiusPrediction['metrics']
+      };
+      
+      return typedData as RadiusPrediction;
     }
   });
 
