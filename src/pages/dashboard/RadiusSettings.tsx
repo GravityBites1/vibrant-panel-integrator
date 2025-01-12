@@ -45,6 +45,11 @@ export default function RadiusSettings() {
 
   const loadCities = async () => {
     try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error("Not authenticated");
+      }
+
       const { data, error } = await supabase
         .from('city_radius')
         .select('*')
@@ -57,7 +62,7 @@ export default function RadiusSettings() {
       console.error("Error loading cities:", error);
       toast({
         title: "Error",
-        description: "Failed to load cities",
+        description: "Failed to load cities. Please make sure you're logged in with admin privileges.",
         variant: "destructive"
       });
     } finally {
@@ -71,6 +76,11 @@ export default function RadiusSettings() {
 
   const onSubmit = async (values: RadiusFormValues) => {
     try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error("Not authenticated");
+      }
+
       const { error } = await supabase
         .from('city_radius')
         .insert({
@@ -92,7 +102,7 @@ export default function RadiusSettings() {
       console.error("Error saving radius settings:", error);
       toast({
         title: "Error",
-        description: "Failed to save radius settings",
+        description: error instanceof Error ? error.message : "Failed to save radius settings. Please make sure you're logged in with admin privileges.",
         variant: "destructive"
       });
     }
@@ -100,6 +110,11 @@ export default function RadiusSettings() {
 
   const updateCityRadius = async (id: string, radius: number) => {
     try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error("Not authenticated");
+      }
+
       const { error } = await supabase
         .from('city_radius')
         .update({ default_radius_km: radius })
@@ -118,7 +133,7 @@ export default function RadiusSettings() {
       console.error("Error updating radius:", error);
       toast({
         title: "Error",
-        description: "Failed to update radius",
+        description: error instanceof Error ? error.message : "Failed to update radius. Please make sure you're logged in with admin privileges.",
         variant: "destructive"
       });
     }
