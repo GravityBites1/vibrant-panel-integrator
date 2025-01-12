@@ -31,7 +31,10 @@ export default function Roles() {
         .from('user_roles')
         .select(`
           *,
-          user:profiles(email, full_name)
+          user:user_id (
+            email:email,
+            full_name:full_name
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -49,7 +52,7 @@ export default function Roles() {
     }
   };
 
-  const updateRole = async (userId: string, newRole: string) => {
+  const updateRole = async (userId: string, newRole: 'admin' | 'moderator' | 'user') => {
     try {
       const { error } = await supabase
         .from('user_roles')
@@ -105,7 +108,7 @@ export default function Roles() {
                   <TableCell>
                     <Select
                       defaultValue={role.role}
-                      onValueChange={(value) => updateRole(role.user_id, value)}
+                      onValueChange={(value: 'admin' | 'moderator' | 'user') => updateRole(role.user_id, value)}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
