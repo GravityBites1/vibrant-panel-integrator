@@ -27,7 +27,7 @@ export default function AddCity() {
   const [center, setCenter] = useState({ lat: 20.5937, lng: 78.9629 }); // Default to India's center
 
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || '',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries: libraries as any,
   });
 
