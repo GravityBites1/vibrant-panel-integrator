@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { GoogleMap, Circle, useLoadScript } from "@react-google-maps/api";
+import { useState, useCallback, useMemo } from "react";
 
 const formSchema = z.object({
   city_name: z.string().min(1, "City name is required"),
@@ -17,9 +19,17 @@ const formSchema = z.object({
 
 type AddCityFormValues = z.infer<typeof formSchema>;
 
+const libraries = ["places"];
+
 export default function AddCity() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [center, setCenter] = useState({ lat: 20.5937, lng: 78.9629 }); // Default to India's center
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || '',
+    libraries: libraries as any,
+  });
 
   const form = useForm<AddCityFormValues>({
     resolver: zodResolver(formSchema),
@@ -28,6 +38,14 @@ export default function AddCity() {
       default_radius_km: 5,
     }
   });
+
+  const radius = form.watch("default_radius_km") * 1000; // Convert km to meters
+
+  const mapOptions = useMemo(() => ({
+    disableDefaultUI: true,
+    clickableIcons: true,
+    scrollwheel: true,
+  }), []);
 
   const onSubmit = async (values: AddCityFormValues) => {
     try {
@@ -62,6 +80,20 @@ export default function AddCity() {
     }
   };
 
+  const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      setCenter({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    }
+  }, []);
+
+  if (loadError) {
+    return <div>Error loading maps</div>;
+  }
+
+  if (!isLoaded) {
+    return <div>Loading maps</div>;
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
@@ -76,15 +108,15 @@ export default function AddCity() {
         <h1 className="text-2xl font-bold tracking-tight">Add New City</h1>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>City Details</CardTitle>
-          <CardDescription>Set up delivery radius for a new city</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>City Details</CardTitle>
+            <CardDescription>Set up delivery radius for a new city</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="city_name"
@@ -116,15 +148,45 @@ export default function AddCity() {
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <Button type="submit">
-                Add City
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                <Button type="submit">
+                  Add City
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>City Location</CardTitle>
+            <CardDescription>Click on the map to set the city center</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px] w-full rounded-md overflow-hidden">
+              <GoogleMap
+                options={mapOptions}
+                zoom={5}
+                center={center}
+                mapContainerClassName="w-full h-full"
+                onClick={onMapClick}
+              >
+                <Circle
+                  center={center}
+                  radius={radius}
+                  options={{
+                    fillColor: "rgba(66, 133, 244, 0.2)",
+                    fillOpacity: 0.4,
+                    strokeColor: "#4285F4",
+                    strokeOpacity: 1,
+                    strokeWeight: 1,
+                  }}
+                />
+              </GoogleMap>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
