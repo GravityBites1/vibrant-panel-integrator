@@ -10,6 +10,7 @@ interface UserRole {
   user_id: string;
   role: 'admin' | 'restaurant' | 'customer' | 'delivery_partner' | 'lead_partner';
   created_at: string;
+  updated_at: string;
   user: {
     email: string;
     full_name: string | null;
@@ -41,6 +42,7 @@ export default function Roles() {
 
       // Type guard to ensure data matches our interface
       const validRoles = data?.filter((role): role is UserRole => 
+        role && 
         role.user && 
         typeof role.user === 'object' && 
         'email' in role.user
