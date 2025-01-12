@@ -36,15 +36,16 @@ const Login = () => {
       });
 
       if (error) {
-        console.error("Error details:", {
+        console.error("Login error details:", {
           message: error.message,
           status: error.status,
-          name: error.name
+          name: error.name,
+          body: error.message
         });
         
         toast({
           title: "Login Failed",
-          description: error.message || "Invalid login credentials. Please make sure you have created the demo account in Supabase.",
+          description: "Invalid login credentials. Please make sure you have created the demo account in Supabase with email: demo@admin.com and password: demo1234",
           variant: "destructive"
         });
         return;
