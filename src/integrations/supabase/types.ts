@@ -456,6 +456,127 @@ export type Database = {
           },
         ]
       }
+      admin_role_audit_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          changes: Json | null
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          changes?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          changes?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_role_audit_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          level: Database["public"]["Enums"]["admin_role_level"]
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          level: Database["public"]["Enums"]["admin_role_level"]
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          level?: Database["public"]["Enums"]["admin_role_level"]
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_login: string | null
+          profile_id: string | null
+          role_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          profile_id?: string | null
+          role_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          profile_id?: string | null
+          role_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_users_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_users_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "admin_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log_categories: {
         Row: {
           created_at: string | null
@@ -1722,6 +1843,114 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_partner_chat_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_from_bot: boolean | null
+          message_type: Database["public"]["Enums"]["chat_message_type"] | null
+          metadata: Json | null
+          session_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_from_bot?: boolean | null
+          message_type?: Database["public"]["Enums"]["chat_message_type"] | null
+          metadata?: Json | null
+          session_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_from_bot?: boolean | null
+          message_type?: Database["public"]["Enums"]["chat_message_type"] | null
+          metadata?: Json | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_partner_chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "lead_partner_chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_partner_chat_quick_replies: {
+        Row: {
+          action_data: Json | null
+          content: string
+          created_at: string | null
+          id: string
+          message_id: string | null
+        }
+        Insert: {
+          action_data?: Json | null
+          content: string
+          created_at?: string | null
+          id?: string
+          message_id?: string | null
+        }
+        Update: {
+          action_data?: Json | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_partner_chat_quick_replies_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "lead_partner_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_partner_chat_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          intent: Database["public"]["Enums"]["chat_intent"] | null
+          metadata: Json | null
+          partner_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          intent?: Database["public"]["Enums"]["chat_intent"] | null
+          metadata?: Json | null
+          partner_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          intent?: Database["public"]["Enums"]["chat_intent"] | null
+          metadata?: Json | null
+          partner_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_partner_chat_sessions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "lead_partner_onboarding"
             referencedColumns: ["id"]
           },
         ]
@@ -4091,6 +4320,41 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          module: Database["public"]["Enums"]["admin_module"]
+          permissions: Database["public"]["Enums"]["permission_type"][]
+          role_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          module: Database["public"]["Enums"]["admin_module"]
+          permissions?: Database["public"]["Enums"]["permission_type"][]
+          role_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          module?: Database["public"]["Enums"]["admin_module"]
+          permissions?: Database["public"]["Enums"]["permission_type"][]
+          role_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "admin_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spatial_ref_sys: {
         Row: {
@@ -9235,6 +9499,34 @@ export type Database = {
           }
     }
     Enums: {
+      admin_module:
+        | "orders"
+        | "users"
+        | "reports"
+        | "marketing"
+        | "radius_management"
+        | "stores"
+        | "campaigns"
+        | "categories"
+        | "settings"
+        | "promotions"
+        | "reviews"
+        | "inventory"
+        | "support"
+        | "payments"
+        | "delivery_partners"
+      admin_role_level:
+        | "super_admin"
+        | "manager"
+        | "support_admin"
+        | "content_admin"
+      chat_intent:
+        | "registration"
+        | "earnings"
+        | "commission"
+        | "support"
+        | "other"
+      chat_message_type: "text" | "quick_reply" | "button" | "image"
       city_status: "active" | "inactive"
       content_status: "pending" | "approved" | "rejected" | "hidden" | "flagged"
       content_type: "review" | "comment" | "report"
@@ -9251,6 +9543,7 @@ export type Database = {
         | "debit_card"
         | "wallet"
         | "bank_transfer"
+      permission_type: "view" | "create" | "edit" | "delete"
       prediction_confidence: "low" | "medium" | "high"
       promotion_type:
         | "percentage"

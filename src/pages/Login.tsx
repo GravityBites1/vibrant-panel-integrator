@@ -13,9 +13,61 @@ const Login = () => {
 
   useEffect(() => {
     console.log("Login component mounted");
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session ? "Has session" : "No session");
       if (session) {
+        // Check if user is an admin
+        const { data: adminUser, error: adminError } = await supabase
+          .from('admin_users')
+          .select(`
+            *,
+            role:admin_roles(
+              name,
+              level
+            )
+          `)
+          .eq('profile_id', session.user.id)
+          .eq('is_active', true)
+          .single();
+
+        if (adminError) {
+          console.error("Error checking admin status:", adminError);
+          toast({
+            title: "Error",
+            description: "Failed to verify admin access. Please try again.",
+            variant: "destructive"
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
+        if (!adminUser) {
+          console.log("User is not an admin");
+          toast({
+            title: "Access Denied",
+            description: "This login is restricted to admin users only.",
+            variant: "destructive"
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
+        // Update last login timestamp
+        const { error: updateError } = await supabase
+          .from('admin_users')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', adminUser.id);
+
+        if (updateError) {
+          console.error("Error updating last login:", updateError);
+        }
+
+        console.log("Admin login successful:", adminUser);
+        toast({
+          title: "Welcome",
+          description: `Logged in as ${adminUser.role.name}`,
+        });
+
         navigate("/");
       }
     });
@@ -86,7 +138,7 @@ const Login = () => {
         <CardContent className="space-y-4">
           <Alert>
             <AlertDescription className="text-sm">
-              Demo Credentials:
+              Demo Admin Credentials:
               <br />
               Email: demo@admin.com
               <br />
