@@ -8,7 +8,8 @@ import {
 import { 
   LayoutDashboard, Users, ShoppingCart, Settings, Menu, 
   LogOut, Sun, Moon, Loader, Store, LineChart as CampaignIcon, 
-  List, Tag, Star, Package, HeadphonesIcon, BarChart3, CreditCard, Bike 
+  List, Tag, Star, Package, HeadphonesIcon, BarChart3, CreditCard, Bike,
+  Shield 
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link, Outlet, useLocation } from "react-router-dom";
@@ -45,6 +46,7 @@ const Index = () => {
     { icon: BarChart3, label: 'Reports', path: '/reports' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: Bike, label: 'Delivery Partners', path: '/delivery-partners' },
+    { icon: Shield, label: 'Roles', path: '/roles' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 

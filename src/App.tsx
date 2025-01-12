@@ -24,6 +24,7 @@ import Reports from "./pages/dashboard/Reports";
 import Payments from "./pages/dashboard/Payments";
 import DeliveryPartners from "./pages/dashboard/DeliveryPartners";
 import AddCity from "./pages/dashboard/AddCity";
+import Roles from "./pages/dashboard/Roles";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/reports" element={<Reports />} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/delivery-partners" element={<DeliveryPartners />} />
+              <Route path="/roles" element={<Roles />} />
             </Route>
           </Routes>
         </BrowserRouter>
