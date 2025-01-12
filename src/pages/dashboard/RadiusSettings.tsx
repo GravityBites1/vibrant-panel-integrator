@@ -38,7 +38,7 @@ export default function RadiusSettings() {
         const { data, error } = await supabase
           .from('city_radius')
           .select('*')
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
 
