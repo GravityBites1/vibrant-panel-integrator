@@ -14,6 +14,7 @@ import Campaigns from "./pages/dashboard/Campaigns";
 import Categories from "./pages/dashboard/Categories";
 import PlatformCategories from "./pages/dashboard/PlatformCategories";
 import Settings from "./pages/dashboard/Settings";
+import RadiusSettings from "./pages/dashboard/RadiusSettings";
 import Promotions from "./pages/dashboard/Promotions";
 import Reviews from "./pages/dashboard/Reviews";
 import Inventory from "./pages/dashboard/Inventory";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/categories" element={<Categories />} />
               <Route path="/platform-categories" element={<PlatformCategories />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/radius-settings" element={<RadiusSettings />} />
               <Route path="/promotions" element={<Promotions />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/inventory" element={<Inventory />} />
