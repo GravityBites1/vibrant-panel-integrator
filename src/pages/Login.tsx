@@ -79,9 +79,26 @@ const Login = () => {
     try {
       console.log("Attempting demo login...");
       
+      // First try to create the demo user
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: "demo@admin.com",
+        password: "demo1234",
+      });
+
+      if (signUpError && signUpError.message !== "User already registered") {
+        console.error("Sign up error:", signUpError);
+        toast({
+          title: "Error",
+          description: signUpError.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Clear any existing sessions first
       await supabase.auth.signOut();
       
+      // Now try to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email: "demo@admin.com",
         password: "demo1234",
