@@ -1,14 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Loader2, PlusCircle, Search } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { CityAnalytics } from "@/components/dashboard/CityAnalytics";
+import { RadiusPredictions } from "@/components/dashboard/RadiusPredictions";
 
 interface CityRadius {
   id: string;
@@ -224,17 +225,31 @@ export default function RadiusSettings() {
       </Card>
 
       {editingId && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Analytics</CardTitle>
-            <CardDescription>
-              Detailed metrics and trends for {cities.find(c => c.id === editingId)?.city_name}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CityAnalytics cityId={editingId} />
-          </CardContent>
-        </Card>
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Analytics</CardTitle>
+              <CardDescription>
+                Detailed metrics and trends for {cities.find(c => c.id === editingId)?.city_name}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CityAnalytics cityId={editingId} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Predictions</CardTitle>
+              <CardDescription>
+                AI-powered radius optimization suggestions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RadiusPredictions cityId={editingId} />
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
