@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import Index from "./pages/Index";
+import Login from "./pages/Login";
 import Orders from "./pages/dashboard/Orders";
 import OrderDetails from "./pages/dashboard/OrderDetails";
 import Users from "./pages/dashboard/Users";
@@ -36,6 +37,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<Index />}>
               <Route path="/orders" element={<Orders />} />
               <Route path="/orders/:id" element={<OrderDetails />} />
