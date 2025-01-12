@@ -38,7 +38,15 @@ export default function Roles() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRoles(data || []);
+
+      // Type guard to ensure data matches our interface
+      const validRoles = data?.filter((role): role is UserRole => 
+        role.user && 
+        typeof role.user === 'object' && 
+        'email' in role.user
+      ) || [];
+
+      setRoles(validRoles);
     } catch (error) {
       console.error('Error fetching roles:', error);
       toast({
