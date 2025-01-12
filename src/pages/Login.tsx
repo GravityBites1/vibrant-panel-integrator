@@ -24,16 +24,31 @@ const Login = () => {
   }, [navigate]);
 
   const loginWithDemo = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: "demo@admin.com",
-      password: "demo1234",
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: "demo@admin.com",
+        password: "demo1234",
+      });
 
-    if (error) {
-      console.error("Error logging in with demo account:", error);
+      if (error) {
+        console.error("Error logging in with demo account:", error);
+        toast({
+          title: "Login Failed",
+          description: error.message || "Invalid login credentials. Please make sure you have created the demo account in Supabase.",
+          variant: "destructive"
+        });
+      } else {
+        console.log("Demo login successful:", data);
+        toast({
+          title: "Success",
+          description: "Logged in successfully",
+        });
+      }
+    } catch (err) {
+      console.error("Unexpected error during login:", err);
       toast({
         title: "Error",
-        description: "Invalid login credentials. Please make sure you have created the demo account in Supabase.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     }
