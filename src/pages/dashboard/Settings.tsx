@@ -8,9 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { 
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { Link, useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   language: z.string(),
@@ -32,6 +42,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
@@ -83,7 +94,6 @@ export default function Settings() {
       if (error) throw error;
 
       if (settings) {
-        // Parse delivery_preferences if it's a string or ensure it's the correct shape
         const delivery_preferences = typeof settings.delivery_preferences === 'string' 
           ? JSON.parse(settings.delivery_preferences)
           : settings.delivery_preferences || {
@@ -152,6 +162,33 @@ export default function Settings() {
 
   return (
     <div className="p-6">
+      <div className="mb-6">
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>
+                <Settings2 className="mr-2 h-4 w-4" />
+                Settings
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  <li className="row-span-3">
+                    <Link to="/settings" className={navigationMenuTriggerStyle()}>
+                      General Settings
+                    </Link>
+                  </li>
+                  <li className="row-span-3">
+                    <Link to="/radius-settings" className={navigationMenuTriggerStyle()}>
+                      Radius Settings
+                    </Link>
+                  </li>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <Card>
