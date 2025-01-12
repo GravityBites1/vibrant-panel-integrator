@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface UserRole {
   id: string;
   user_id: string;
-  role: 'admin' | 'moderator' | 'user';
+  role: 'admin' | 'restaurant' | 'customer' | 'delivery_partner' | 'lead_partner';
   created_at: string;
   user: {
     email: string;
@@ -31,9 +30,9 @@ export default function Roles() {
         .from('user_roles')
         .select(`
           *,
-          user:user_id (
-            email:email,
-            full_name:full_name
+          user:profiles!user_roles_user_id_fkey(
+            email,
+            full_name
           )
         `)
         .order('created_at', { ascending: false });
@@ -52,7 +51,7 @@ export default function Roles() {
     }
   };
 
-  const updateRole = async (userId: string, newRole: 'admin' | 'moderator' | 'user') => {
+  const updateRole = async (userId: string, newRole: 'admin' | 'restaurant' | 'customer' | 'delivery_partner' | 'lead_partner') => {
     try {
       const { error } = await supabase
         .from('user_roles')
@@ -108,15 +107,17 @@ export default function Roles() {
                   <TableCell>
                     <Select
                       defaultValue={role.role}
-                      onValueChange={(value: 'admin' | 'moderator' | 'user') => updateRole(role.user_id, value)}
+                      onValueChange={(value: 'admin' | 'restaurant' | 'customer' | 'delivery_partner' | 'lead_partner') => updateRole(role.user_id, value)}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="restaurant">Restaurant</SelectItem>
+                        <SelectItem value="customer">Customer</SelectItem>
+                        <SelectItem value="delivery_partner">Delivery Partner</SelectItem>
+                        <SelectItem value="lead_partner">Lead Partner</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
