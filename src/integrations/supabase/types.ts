@@ -718,6 +718,36 @@ export type Database = {
           },
         ]
       }
+      city_radius: {
+        Row: {
+          city_name: string
+          created_at: string | null
+          default_radius_km: number
+          id: string
+          status: Database["public"]["Enums"]["city_status"] | null
+          total_deliveries: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          city_name: string
+          created_at?: string | null
+          default_radius_km: number
+          id?: string
+          status?: Database["public"]["Enums"]["city_status"] | null
+          total_deliveries?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          city_name?: string
+          created_at?: string | null
+          default_radius_km?: number
+          id?: string
+          status?: Database["public"]["Enums"]["city_status"] | null
+          total_deliveries?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cod_balance_adjustments: {
         Row: {
           amount: number
@@ -3377,6 +3407,7 @@ export type Database = {
           lock_expires_at: string | null
           phone_number: string | null
           phone_verified: boolean | null
+          role: string | null
           updated_at: string | null
           vehicle_type: Database["public"]["Enums"]["vehicle_type"] | null
         }
@@ -3397,6 +3428,7 @@ export type Database = {
           lock_expires_at?: string | null
           phone_number?: string | null
           phone_verified?: boolean | null
+          role?: string | null
           updated_at?: string | null
           vehicle_type?: Database["public"]["Enums"]["vehicle_type"] | null
         }
@@ -3417,6 +3449,7 @@ export type Database = {
           lock_expires_at?: string | null
           phone_number?: string | null
           phone_verified?: boolean | null
+          role?: string | null
           updated_at?: string | null
           vehicle_type?: Database["public"]["Enums"]["vehicle_type"] | null
         }
@@ -9081,6 +9114,7 @@ export type Database = {
           }
     }
     Enums: {
+      city_status: "active" | "inactive"
       content_status: "pending" | "approved" | "rejected" | "hidden" | "flagged"
       content_type: "review" | "comment" | "report"
       order_status:
