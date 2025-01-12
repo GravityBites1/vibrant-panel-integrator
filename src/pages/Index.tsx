@@ -12,7 +12,7 @@ import {
   Shield 
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setStats, toggleDarkMode, toggleSidebar, setLoading } from "@/store/slices/dashboardSlice";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,7 @@ const Index = () => {
   const dispatch = useAppDispatch();
   const { stats, isDarkMode, isSidebarOpen, isLoading } = useAppSelector(state => state.dashboard);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Sample data for chart
   const data = [
@@ -49,6 +50,26 @@ const Index = () => {
     { icon: Shield, label: 'Roles', path: '/roles' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      navigate('/login');
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
+      });
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log out",
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -108,37 +129,45 @@ const Index = () => {
         {/* Sidebar */}
         <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} 
           transition-all duration-300 bg-white dark:bg-gray-800 border-r 
-          border-gray-200 dark:border-gray-700`}>
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between p-4 border-b 
-              border-gray-200 dark:border-gray-700">
-              <h1 className={`font-bold text-xl text-gray-800 dark:text-white 
-                ${!isSidebarOpen && 'hidden'}`}>
-                Admin Panel
-              </h1>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => dispatch(toggleSidebar())}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
-            <ScrollArea className="flex-1 py-4">
-              <nav className="space-y-2 px-2">
-                {navItems.map((item) => (
-                  <Link key={item.path} to={item.path}>
-                    <Button
-                      variant={location.pathname === item.path ? 'secondary' : 'ghost'}
-                      className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
-                    >
-                      <item.icon className="h-5 w-5 mr-2" />
-                      {isSidebarOpen && <span>{item.label}</span>}
-                    </Button>
-                  </Link>
-                ))}
-              </nav>
-            </ScrollArea>
+          border-gray-200 dark:border-gray-700 flex flex-col`}>
+          <div className="flex items-center justify-between p-4 border-b 
+            border-gray-200 dark:border-gray-700">
+            <h1 className={`font-bold text-xl text-gray-800 dark:text-white 
+              ${!isSidebarOpen && 'hidden'}`}>
+              Admin Panel
+            </h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => dispatch(toggleSidebar())}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+          <ScrollArea className="flex-1 py-4">
+            <nav className="space-y-2 px-2">
+              {navItems.map((item) => (
+                <Link key={item.path} to={item.path}>
+                  <Button
+                    variant={location.pathname === item.path ? 'secondary' : 'ghost'}
+                    className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
+                  >
+                    <item.icon className="h-5 w-5 mr-2" />
+                    {isSidebarOpen && <span>{item.label}</span>}
+                  </Button>
+                </Link>
+              ))}
+            </nav>
+          </ScrollArea>
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5 mr-2" />
+              {isSidebarOpen && <span>Logout</span>}
+            </Button>
           </div>
         </aside>
 
