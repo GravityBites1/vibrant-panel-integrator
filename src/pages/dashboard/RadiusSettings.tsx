@@ -8,12 +8,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { CityAnalytics } from "@/components/dashboard/CityAnalytics";
 
 interface CityRadius {
   id: string;
   city_name: string;
   default_radius_km: number;
   status: 'active' | 'inactive';
+  total_deliveries: number;
+  avg_delivery_time: number;
+  delivery_success_rate: number;
+  total_revenue: number;
   created_at: string;
   updated_at: string;
 }
@@ -106,7 +111,7 @@ export default function RadiusSettings() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">City-Wise Delivery Radius Management</h1>
           <p className="text-muted-foreground">
-            Manage delivery coverage by setting radius limits for each city
+            Manage delivery coverage and analyze performance by setting radius limits for each city
           </p>
         </div>
         <div className="flex gap-4 items-center">
@@ -144,6 +149,9 @@ export default function RadiusSettings() {
                 <TableRow>
                   <TableHead>City Name</TableHead>
                   <TableHead>Current Radius (km)</TableHead>
+                  <TableHead>Success Rate</TableHead>
+                  <TableHead>Avg Time</TableHead>
+                  <TableHead>Revenue</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -186,6 +194,9 @@ export default function RadiusSettings() {
                         </span>
                       )}
                     </TableCell>
+                    <TableCell>{city.delivery_success_rate.toFixed(1)}%</TableCell>
+                    <TableCell>{city.avg_delivery_time} min</TableCell>
+                    <TableCell>₹{city.total_revenue.toLocaleString()}</TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         city.status === 'active' 
@@ -211,6 +222,20 @@ export default function RadiusSettings() {
           )}
         </CardContent>
       </Card>
+
+      {editingId && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Performance Analytics</CardTitle>
+            <CardDescription>
+              Detailed metrics and trends for {cities.find(c => c.id === editingId)?.city_name}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CityAnalytics cityId={editingId} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

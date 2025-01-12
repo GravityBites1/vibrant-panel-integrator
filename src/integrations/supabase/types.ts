@@ -720,33 +720,86 @@ export type Database = {
       }
       city_radius: {
         Row: {
+          avg_delivery_time: number | null
           city_name: string
           created_at: string | null
           default_radius_km: number
+          delivery_success_rate: number | null
           id: string
           status: Database["public"]["Enums"]["city_status"] | null
           total_deliveries: number | null
+          total_revenue: number | null
           updated_at: string | null
         }
         Insert: {
+          avg_delivery_time?: number | null
           city_name: string
           created_at?: string | null
           default_radius_km: number
+          delivery_success_rate?: number | null
           id?: string
           status?: Database["public"]["Enums"]["city_status"] | null
           total_deliveries?: number | null
+          total_revenue?: number | null
           updated_at?: string | null
         }
         Update: {
+          avg_delivery_time?: number | null
           city_name?: string
           created_at?: string | null
           default_radius_km?: number
+          delivery_success_rate?: number | null
           id?: string
           status?: Database["public"]["Enums"]["city_status"] | null
           total_deliveries?: number | null
+          total_revenue?: number | null
           updated_at?: string | null
         }
         Relationships: []
+      }
+      city_radius_metrics: {
+        Row: {
+          avg_delivery_time: number | null
+          city_id: string | null
+          created_at: string | null
+          delivery_success_rate: number | null
+          id: string
+          period_end: string
+          period_start: string
+          revenue: number | null
+          total_orders: number | null
+        }
+        Insert: {
+          avg_delivery_time?: number | null
+          city_id?: string | null
+          created_at?: string | null
+          delivery_success_rate?: number | null
+          id?: string
+          period_end: string
+          period_start: string
+          revenue?: number | null
+          total_orders?: number | null
+        }
+        Update: {
+          avg_delivery_time?: number | null
+          city_id?: string | null
+          created_at?: string | null
+          delivery_success_rate?: number | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          revenue?: number | null
+          total_orders?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "city_radius_metrics_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "city_radius"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cod_balance_adjustments: {
         Row: {
