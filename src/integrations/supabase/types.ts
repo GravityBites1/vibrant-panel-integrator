@@ -3671,6 +3671,50 @@ export type Database = {
           },
         ]
       }
+      radius_predictions: {
+        Row: {
+          city_id: string | null
+          confidence: number
+          created_at: string | null
+          current_radius: number
+          id: string
+          metrics: Json
+          reason: string
+          suggested_radius: number
+          updated_at: string | null
+        }
+        Insert: {
+          city_id?: string | null
+          confidence: number
+          created_at?: string | null
+          current_radius: number
+          id?: string
+          metrics?: Json
+          reason: string
+          suggested_radius: number
+          updated_at?: string | null
+        }
+        Update: {
+          city_id?: string | null
+          confidence?: number
+          created_at?: string | null
+          current_radius?: number
+          id?: string
+          metrics?: Json
+          reason?: string
+          suggested_radius?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radius_predictions_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "city_radius"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           created_at: string | null
@@ -9183,6 +9227,7 @@ export type Database = {
         | "debit_card"
         | "wallet"
         | "bank_transfer"
+      prediction_confidence: "low" | "medium" | "high"
       promotion_type:
         | "percentage"
         | "fixed_amount"
