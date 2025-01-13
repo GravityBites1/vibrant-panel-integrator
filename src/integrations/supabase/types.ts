@@ -4790,7 +4790,9 @@ export type Database = {
           date: string
           id: string
           impressions: number | null
+          orders: number | null
           revenue: number | null
+          spend: number | null
           store_id: string | null
           updated_at: string | null
         }
@@ -4802,7 +4804,9 @@ export type Database = {
           date: string
           id?: string
           impressions?: number | null
+          orders?: number | null
           revenue?: number | null
+          spend?: number | null
           store_id?: string | null
           updated_at?: string | null
         }
@@ -4814,7 +4818,9 @@ export type Database = {
           date?: string
           id?: string
           impressions?: number | null
+          orders?: number | null
           revenue?: number | null
+          spend?: number | null
           store_id?: string | null
           updated_at?: string | null
         }
