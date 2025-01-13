@@ -3,15 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-interface CampaignMetric {
-  date: string;
-  impressions: number;
-  clicks: number;
-  conversions: number;
-  spend: number;
-  revenue: number;
-}
-
 interface AdClickCount {
   count: number;
 }
@@ -53,7 +44,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       }
 
       // Process and aggregate data by date
-      const aggregatedData = (data as AdImpressionData[]).reduce((acc: Record<string, CampaignMetric>, curr) => {
+      const aggregatedData = (data as unknown as AdImpressionData[]).reduce((acc: Record<string, CampaignMetric>, curr) => {
         const date = new Date(curr.created_at).toISOString().split('T')[0];
         if (!acc[date]) {
           acc[date] = {

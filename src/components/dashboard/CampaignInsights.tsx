@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
 
 interface InsightMetric {
   id: string;
   type: string;
   message: string;
   severity: 'info' | 'warning' | 'success';
+  created_at: string;
   metrics: {
     current_value: number;
     previous_value: number;
@@ -18,29 +19,64 @@ interface InsightMetric {
 
 export function CampaignInsights() {
   const { data: insights, isLoading } = useQuery({
-    queryKey: ['campaignInsights'],
+    queryKey: ['aiInsights'],
     queryFn: async () => {
-      console.log('Fetching campaign insights...');
-      const { data, error } = await supabase
-        .from('ai_insights')
-        .select('*')
-        .eq('type', 'campaign')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error) {
-        console.error('Error fetching insights:', error);
-        throw error;
-      }
-
-      // Transform the data to match our interface
-      return data.map(item => ({
-        id: item.id,
-        type: item.type,
-        message: item.message,
-        severity: item.severity,
-        metrics: item.metrics as InsightMetric['metrics']
-      })) as InsightMetric[];
+      // Demo insights data
+      const demoInsights: InsightMetric[] = [
+        {
+          id: '1',
+          type: 'revenue',
+          message: 'Revenue growth has increased by 25% in the northern region',
+          severity: 'success',
+          created_at: new Date().toISOString(),
+          metrics: {
+            current_value: 125000,
+            previous_value: 100000,
+            change_percentage: 25,
+            trend: 'up'
+          }
+        },
+        {
+          id: '2',
+          type: 'orders',
+          message: 'Order cancellation rate is above average in downtown area',
+          severity: 'warning',
+          created_at: new Date().toISOString(),
+          metrics: {
+            current_value: 15,
+            previous_value: 8,
+            change_percentage: 87.5,
+            trend: 'up'
+          }
+        },
+        {
+          id: '3',
+          type: 'partners',
+          message: 'Partner satisfaction score has improved this week',
+          severity: 'success',
+          created_at: new Date().toISOString(),
+          metrics: {
+            current_value: 4.5,
+            previous_value: 4.2,
+            change_percentage: 7.14,
+            trend: 'up'
+          }
+        },
+        {
+          id: '4',
+          type: 'delivery',
+          message: 'Average delivery time has decreased by 12%',
+          severity: 'success',
+          created_at: new Date().toISOString(),
+          metrics: {
+            current_value: 28,
+            previous_value: 32,
+            change_percentage: -12.5,
+            trend: 'down'
+          }
+        }
+      ];
+      return demoInsights;
     }
   });
 
