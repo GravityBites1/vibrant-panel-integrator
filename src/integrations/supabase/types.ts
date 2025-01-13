@@ -1410,6 +1410,42 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_ad_reports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          filters: Json | null
+          id: string
+          last_generated: string | null
+          name: string
+          schedule: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          filters?: Json | null
+          id?: string
+          last_generated?: string | null
+          name: string
+          schedule?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          filters?: Json | null
+          id?: string
+          last_generated?: string | null
+          name?: string
+          schedule?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       custom_reports: {
         Row: {
           created_at: string | null
@@ -1898,6 +1934,47 @@ export type Database = {
             columns: ["rule_id"]
             isOneToOne: false
             referencedRelation: "fraud_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_ad_reports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          error: string | null
+          file_url: string | null
+          id: string
+          report_config_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          error?: string | null
+          file_url?: string | null
+          id?: string
+          report_config_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          error?: string | null
+          file_url?: string | null
+          id?: string
+          report_config_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_ad_reports_report_config_id_fkey"
+            columns: ["report_config_id"]
+            isOneToOne: false
+            referencedRelation: "custom_ad_reports"
             referencedColumns: ["id"]
           },
         ]
@@ -4684,6 +4761,60 @@ export type Database = {
           srtext?: string | null
         }
         Relationships: []
+      }
+      store_ad_performance: {
+        Row: {
+          avg_order_value: number | null
+          campaign_id: string | null
+          clicks: number | null
+          created_at: string | null
+          date: string
+          id: string
+          impressions: number | null
+          revenue: number | null
+          store_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_order_value?: number | null
+          campaign_id?: string | null
+          clicks?: number | null
+          created_at?: string | null
+          date: string
+          id?: string
+          impressions?: number | null
+          revenue?: number | null
+          store_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_order_value?: number | null
+          campaign_id?: string | null
+          clicks?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          revenue?: number | null
+          store_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_ad_performance_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_ad_performance_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       store_bank_details: {
         Row: {
