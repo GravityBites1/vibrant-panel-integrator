@@ -10,6 +10,7 @@ import { PredictiveAnalytics } from "@/components/dashboard/PredictiveAnalytics"
 import { CampaignFilters, CampaignFilters as CampaignFiltersType } from "@/components/dashboard/CampaignFilters";
 import { CampaignGeographicPerformance } from "@/components/dashboard/CampaignGeographicPerformance";
 import { CampaignSpendingTrends } from "@/components/dashboard/CampaignSpendingTrends";
+import { CampaignAIInsights } from "@/components/dashboard/CampaignAIInsights";
 
 interface Campaign {
   id: string;
@@ -196,12 +197,12 @@ export default function Campaigns() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CampaignAIInsights />
         <CampaignSpendingTrends />
-        <CampaignGeographicPerformance />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <CampaignInsights />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CampaignGeographicPerformance />
         <PredictiveAnalytics />
       </div>
 
