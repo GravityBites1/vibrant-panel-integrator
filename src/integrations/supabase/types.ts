@@ -374,6 +374,88 @@ export type Database = {
           },
         ]
       }
+      addon_groups: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_required: boolean | null
+          max_selections: number | null
+          menu_item_id: string | null
+          min_selections: number | null
+          name: string
+          type: Database["public"]["Enums"]["addon_group_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          max_selections?: number | null
+          menu_item_id?: string | null
+          min_selections?: number | null
+          name: string
+          type: Database["public"]["Enums"]["addon_group_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          max_selections?: number | null
+          menu_item_id?: string | null
+          min_selections?: number | null
+          name?: string
+          type?: Database["public"]["Enums"]["addon_group_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addon_groups_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      addons: {
+        Row: {
+          created_at: string | null
+          group_id: string | null
+          id: string
+          is_available: boolean | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          is_available?: boolean | null
+          name: string
+          price?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          is_available?: boolean | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addons_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "addon_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_activity_logs: {
         Row: {
           action: string
@@ -9701,6 +9783,7 @@ export type Database = {
           }
     }
     Enums: {
+      addon_group_type: "single" | "multiple"
       admin_module:
         | "orders"
         | "users"
