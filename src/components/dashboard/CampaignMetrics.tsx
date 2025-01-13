@@ -22,11 +22,17 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       // First get impressions
-      const { data: impressionsData, error: impressionsError } = await supabase
+      let query = supabase
         .from('ad_impressions')
         .select('created_at, campaign_id')
-        .gte('created_at', sevenDaysAgo.toISOString())
-        .eq('campaign_id', campaignId || '');
+        .gte('created_at', sevenDaysAgo.toISOString());
+
+      // Only add campaign filter if campaignId is provided
+      if (campaignId) {
+        query = query.eq('campaign_id', campaignId);
+      }
+
+      const { data: impressionsData, error: impressionsError } = await query;
 
       if (impressionsError) {
         console.error('Error fetching impressions:', impressionsError);
@@ -34,11 +40,16 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       }
 
       // Get clicks count
-      const { data: clicksData, error: clicksError } = await supabase
+      let clicksQuery = supabase
         .from('ad_clicks')
         .select('campaign_id, created_at')
-        .gte('created_at', sevenDaysAgo.toISOString())
-        .eq('campaign_id', campaignId || '');
+        .gte('created_at', sevenDaysAgo.toISOString());
+
+      if (campaignId) {
+        clicksQuery = clicksQuery.eq('campaign_id', campaignId);
+      }
+
+      const { data: clicksData, error: clicksError } = await clicksQuery;
 
       if (clicksError) {
         console.error('Error fetching clicks:', clicksError);
@@ -46,11 +57,16 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       }
 
       // Get conversions count
-      const { data: conversionsData, error: conversionsError } = await supabase
+      let conversionsQuery = supabase
         .from('ad_conversions')
         .select('campaign_id, created_at')
-        .gte('created_at', sevenDaysAgo.toISOString())
-        .eq('campaign_id', campaignId || '');
+        .gte('created_at', sevenDaysAgo.toISOString());
+
+      if (campaignId) {
+        conversionsQuery = conversionsQuery.eq('campaign_id', campaignId);
+      }
+
+      const { data: conversionsData, error: conversionsError } = await conversionsQuery;
 
       if (conversionsError) {
         console.error('Error fetching conversions:', conversionsError);
