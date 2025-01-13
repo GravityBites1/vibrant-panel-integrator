@@ -13,6 +13,7 @@ import { CampaignSpendingTrends } from "@/components/dashboard/CampaignSpendingT
 import { CampaignAIInsights } from "@/components/dashboard/CampaignAIInsights";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { StoresRunningAds } from "@/components/dashboard/StoresRunningAds";
 
 interface Campaign {
   id: string;
@@ -240,6 +241,8 @@ export default function Campaigns() {
           </CardContent>
         </Card>
       </div>
+
+      <StoresRunningAds />
 
       <div className="space-y-4">
         <div className="flex justify-between items-center">
