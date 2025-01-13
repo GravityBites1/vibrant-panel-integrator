@@ -28,29 +28,44 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      const query = supabase
+      // First get impressions
+      const { data: impressionsData, error: impressionsError } = await supabase
         .from('ad_impressions')
-        .select(`
-          created_at,
-          campaign_id,
-          (SELECT count(*) FROM ad_clicks WHERE ad_clicks.campaign_id = ad_impressions.campaign_id) as clicks_count,
-          (SELECT count(*) FROM ad_conversions WHERE ad_conversions.campaign_id = ad_impressions.campaign_id) as conversions_count
-        `)
-        .gte('created_at', sevenDaysAgo.toISOString());
+        .select('created_at, campaign_id')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .eq(campaignId ? 'campaign_id' : 'campaign_id', campaignId || '');
 
-      if (campaignId) {
-        query.eq('campaign_id', campaignId);
+      if (impressionsError) {
+        console.error('Error fetching impressions:', impressionsError);
+        throw impressionsError;
       }
 
-      const { data, error } = await query;
+      // Get clicks count
+      const { data: clicksData, error: clicksError } = await supabase
+        .from('ad_clicks')
+        .select('campaign_id, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .eq(campaignId ? 'campaign_id' : 'campaign_id', campaignId || '');
 
-      if (error) {
-        console.error('Error fetching metrics:', error);
-        throw error;
+      if (clicksError) {
+        console.error('Error fetching clicks:', clicksError);
+        throw clicksError;
+      }
+
+      // Get conversions count
+      const { data: conversionsData, error: conversionsError } = await supabase
+        .from('ad_conversions')
+        .select('campaign_id, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .eq(campaignId ? 'campaign_id' : 'campaign_id', campaignId || '');
+
+      if (conversionsError) {
+        console.error('Error fetching conversions:', conversionsError);
+        throw conversionsError;
       }
 
       // Process and aggregate data by date
-      const aggregatedData = (data as AdImpressionData[]).reduce((acc: Record<string, CampaignMetric>, curr) => {
+      const aggregatedData = impressionsData.reduce((acc: Record<string, CampaignMetric>, curr) => {
         const date = new Date(curr.created_at).toISOString().split('T')[0];
         if (!acc[date]) {
           acc[date] = {
@@ -63,8 +78,17 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
           };
         }
         acc[date].impressions++;
-        acc[date].clicks = curr.clicks_count;
-        acc[date].conversions = curr.conversions_count;
+        
+        // Add clicks for this date
+        acc[date].clicks = clicksData?.filter(click => 
+          new Date(click.created_at).toISOString().split('T')[0] === date
+        ).length || 0;
+        
+        // Add conversions for this date
+        acc[date].conversions = conversionsData?.filter(conversion => 
+          new Date(conversion.created_at).toISOString().split('T')[0] === date
+        ).length || 0;
+        
         return acc;
       }, {});
 
