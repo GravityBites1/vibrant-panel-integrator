@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Trash2, Upload } from "lucide-react";
+import { Pencil, Trash2, Search } from "lucide-react";
 
 interface PlatformCategory {
   id: string;
@@ -42,6 +42,7 @@ export default function PlatformCategories() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<PlatformCategory | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -207,137 +208,149 @@ export default function PlatformCategories() {
     return <div>Loading...</div>;
   }
 
+  const filteredCategories = categories.filter(category => 
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.commission_rate.toString().includes(searchTerm) ||
+    category.platform_fee.toString().includes(searchTerm) ||
+    category.gst_rate.toString().includes(searchTerm)
+  );
+
   return (
     <div className="p-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <CardTitle>Platform Categories</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) {
-              setEditingCategory(null);
-              form.reset();
-            }
-          }}>
-            <DialogTrigger asChild>
-              <Button>Add Category</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{editingCategory ? 'Edit' : 'Add New'} Platform Category</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="commission_rate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Commission Rate (%)</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" step="0.01" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="platform_fee"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Platform Fee</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" step="0.01" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="gst_rate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>GST Rate (%)</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" step="0.01" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="points_rate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Points Rate</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" step="0.01" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="points_expiry_days"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Points Expiry Days (Optional)</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="number" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="icon"
-                    render={({ field: { onChange, value, ...field } }) => (
-                      <FormItem>
-                        <FormLabel>Icon</FormLabel>
-                        <FormControl>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => onChange(e.target.files)}
-                              {...field}
-                            />
-                            {editingCategory?.icon_url && (
-                              <img 
-                                src={editingCategory.icon_url} 
-                                alt="Current icon" 
-                                className="w-8 h-8 object-cover"
+          <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search categories..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 w-full md:w-[250px]"
+              />
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>Add Category</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{editingCategory ? 'Edit' : 'Add New'} Platform Category</DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="commission_rate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Commission Rate (%)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.01" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="platform_fee"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Platform Fee</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.01" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="gst_rate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>GST Rate (%)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.01" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="points_rate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Points Rate</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="0.01" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="points_expiry_days"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Points Expiry Days (Optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="icon"
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <FormItem>
+                          <FormLabel>Icon</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => onChange(e.target.files)}
+                                {...field}
                               />
-                            )}
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit">{editingCategory ? 'Update' : 'Create'} Category</Button>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+                              {editingCategory?.icon_url && (
+                                <img 
+                                  src={editingCategory.icon_url} 
+                                  alt="Current icon" 
+                                  className="w-8 h-8 object-cover"
+                                />
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit">{editingCategory ? 'Update' : 'Create'} Category</Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -354,7 +367,7 @@ export default function PlatformCategories() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories.map((category) => (
+              {filteredCategories.map((category) => (
                 <TableRow key={category.id}>
                   <TableCell>
                     {category.icon_url ? (
