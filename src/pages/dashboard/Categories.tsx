@@ -14,13 +14,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 
-// Define the allowed store types
 type StoreType = "restaurant" | "grocery" | "pet_food" | "beverages" | "other";
 
 const Categories = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -119,8 +120,19 @@ const Categories = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Add New Category</CardTitle>
-          <div className="text-sm text-muted-foreground">
-            Total Categories: {categoriesCount || 0}
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search categories..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 w-[250px]"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Total Categories: {categoriesCount || 0}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
