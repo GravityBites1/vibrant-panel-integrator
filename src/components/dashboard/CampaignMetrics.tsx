@@ -12,13 +12,6 @@ interface CampaignMetric {
   revenue: number;
 }
 
-interface AdImpressionData {
-  created_at: string;
-  campaign_id: string;
-  clicks_count: number;
-  conversions_count: number;
-}
-
 export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['campaignMetrics', campaignId],
@@ -33,7 +26,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
         .from('ad_impressions')
         .select('created_at, campaign_id')
         .gte('created_at', sevenDaysAgo.toISOString())
-        .eq(campaignId ? 'campaign_id' : 'campaign_id', campaignId || '');
+        .eq('campaign_id', campaignId || '');
 
       if (impressionsError) {
         console.error('Error fetching impressions:', impressionsError);
@@ -45,7 +38,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
         .from('ad_clicks')
         .select('campaign_id, created_at')
         .gte('created_at', sevenDaysAgo.toISOString())
-        .eq(campaignId ? 'campaign_id' : 'campaign_id', campaignId || '');
+        .eq('campaign_id', campaignId || '');
 
       if (clicksError) {
         console.error('Error fetching clicks:', clicksError);
@@ -57,7 +50,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
         .from('ad_conversions')
         .select('campaign_id, created_at')
         .gte('created_at', sevenDaysAgo.toISOString())
-        .eq(campaignId ? 'campaign_id' : 'campaign_id', campaignId || '');
+        .eq('campaign_id', campaignId || '');
 
       if (conversionsError) {
         console.error('Error fetching conversions:', conversionsError);
