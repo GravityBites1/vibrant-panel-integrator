@@ -7,6 +7,9 @@ import { Search } from "lucide-react";
 import { CampaignInsights } from "@/components/dashboard/CampaignInsights";
 import { CampaignMetrics } from "@/components/dashboard/CampaignMetrics";
 import { PredictiveAnalytics } from "@/components/dashboard/PredictiveAnalytics";
+import { CampaignFilters, CampaignFilters as CampaignFiltersType } from "@/components/dashboard/CampaignFilters";
+import { CampaignGeographicPerformance } from "@/components/dashboard/CampaignGeographicPerformance";
+import { CampaignSpendingTrends } from "@/components/dashboard/CampaignSpendingTrends";
 
 interface Campaign {
   id: string;
@@ -37,6 +40,12 @@ export default function Campaigns() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const [filters, setFilters] = useState<CampaignFiltersType>({
+    dateRange: { from: undefined, to: undefined },
+    campaignType: "",
+    store: "",
+    city: ""
+  });
 
   useEffect(() => {
     console.log("Fetching campaigns data...");
@@ -104,6 +113,12 @@ export default function Campaigns() {
     };
   };
 
+  const handleFilterChange = (newFilters: CampaignFiltersType) => {
+    setFilters(newFilters);
+    // Apply filters to campaigns data
+    // This is where you would implement the filtering logic
+  };
+
   const filteredCampaigns = campaigns.filter(campaign => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -131,6 +146,8 @@ export default function Campaigns() {
           />
         </div>
       </div>
+
+      <CampaignFilters onFilterChange={handleFilterChange} />
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
@@ -176,6 +193,11 @@ export default function Campaigns() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CampaignSpendingTrends />
+        <CampaignGeographicPerformance />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
