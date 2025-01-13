@@ -3,6 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Package, Clock, DollarSign } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 const demoOrders = [
   {
@@ -49,6 +51,7 @@ const demoOrders = [
 
 export default function Orders() {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -61,13 +64,30 @@ export default function Orders() {
     }
   };
 
+  const filteredOrders = demoOrders.filter(order => 
+    order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.status.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-6">
       <Card>
         <div className="p-4">
-          <div className="flex items-center space-x-4 mb-4">
-            <Package className="h-6 w-6 text-gray-600" />
-            <h2 className="text-2xl font-semibold">Orders</h2>
+          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-4">
+            <div className="flex items-center space-x-4">
+              <Package className="h-6 w-6 text-gray-600" />
+              <h2 className="text-2xl font-semibold">Orders</h2>
+            </div>
+            <div className="w-full md:w-1/3">
+              <Input
+                type="search"
+                placeholder="Search orders..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
           </div>
           <Table>
             <TableHeader>
@@ -99,7 +119,7 @@ export default function Orders() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {demoOrders.map((order) => (
+              {filteredOrders.map((order) => (
                 <TableRow 
                   key={order.id}
                   className="cursor-pointer hover:bg-muted"
