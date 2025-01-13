@@ -21,11 +21,12 @@ export function AdminActivityLogs() {
   const { data: logs, isLoading } = useQuery({
     queryKey: ['adminActivityLogs'],
     queryFn: async () => {
+      console.log('Fetching admin activity logs...');
       const { data, error } = await supabase
         .from('admin_activity_logs')
         .select(`
           *,
-          profiles:admin_id (
+          profiles:admin_id(
             full_name,
             email
           )
@@ -34,6 +35,7 @@ export function AdminActivityLogs() {
         .limit(50);
 
       if (error) {
+        console.error('Error fetching activity logs:', error);
         toast({
           title: "Error fetching activity logs",
           description: error.message,
@@ -42,6 +44,7 @@ export function AdminActivityLogs() {
         throw error;
       }
 
+      console.log('Fetched activity logs:', data);
       return data as ActivityLog[];
     }
   });
@@ -71,6 +74,11 @@ export function AdminActivityLogs() {
                 <p className="text-sm text-muted-foreground">
                   {new Date(log.created_at).toLocaleString()}
                 </p>
+                {log.profiles && (
+                  <p className="text-sm text-muted-foreground">
+                    By: {log.profiles.full_name} ({log.profiles.email})
+                  </p>
+                )}
                 {log.details && Object.keys(log.details).length > 0 && (
                   <pre className="mt-2 text-sm bg-muted p-2 rounded">
                     {JSON.stringify(log.details, null, 2)}
