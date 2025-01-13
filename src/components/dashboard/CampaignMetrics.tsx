@@ -21,7 +21,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      // First get impressions
+      // Base query for impressions
       let query = supabase
         .from('ad_impressions')
         .select('created_at, campaign_id')
@@ -39,7 +39,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
         throw impressionsError;
       }
 
-      // Get clicks count
+      // Base query for clicks
       let clicksQuery = supabase
         .from('ad_clicks')
         .select('campaign_id, created_at')
@@ -56,7 +56,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
         throw clicksError;
       }
 
-      // Get conversions count
+      // Base query for conversions
       let conversionsQuery = supabase
         .from('ad_conversions')
         .select('campaign_id, created_at')
