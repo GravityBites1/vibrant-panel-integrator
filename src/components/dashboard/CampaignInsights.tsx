@@ -33,7 +33,14 @@ export function CampaignInsights() {
         throw error;
       }
 
-      return data as InsightMetric[];
+      // Transform the data to match our interface
+      return data.map(item => ({
+        id: item.id,
+        type: item.type,
+        message: item.message,
+        severity: item.severity,
+        metrics: item.metrics as InsightMetric['metrics']
+      })) as InsightMetric[];
     }
   });
 

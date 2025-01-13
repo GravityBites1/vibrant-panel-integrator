@@ -12,6 +12,21 @@ interface CampaignMetric {
   revenue: number;
 }
 
+interface AdClickCount {
+  count: number;
+}
+
+interface AdConversionCount {
+  count: number;
+}
+
+interface AdImpressionData {
+  created_at: string;
+  campaign_id: string;
+  ad_clicks: AdClickCount[];
+  ad_conversions: AdConversionCount[];
+}
+
 export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['campaignMetrics', campaignId],
@@ -38,7 +53,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       }
 
       // Process and aggregate data by date
-      const aggregatedData = data.reduce((acc: Record<string, CampaignMetric>, curr) => {
+      const aggregatedData = (data as AdImpressionData[]).reduce((acc: Record<string, CampaignMetric>, curr) => {
         const date = new Date(curr.created_at).toISOString().split('T')[0];
         if (!acc[date]) {
           acc[date] = {
