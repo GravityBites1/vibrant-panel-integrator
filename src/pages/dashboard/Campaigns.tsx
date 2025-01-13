@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Search } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { CampaignInsights } from "@/components/dashboard/CampaignInsights";
+import { CampaignMetrics } from "@/components/dashboard/CampaignMetrics";
+import { PredictiveAnalytics } from "@/components/dashboard/PredictiveAnalytics";
 
 interface Campaign {
   id: string;
@@ -176,35 +178,12 @@ export default function Campaigns() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Campaign Performance Over Time</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={filteredCampaigns}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="start_date" />
-                <YAxis />
-                <Tooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="spent_amount" 
-                  stroke="#8884d8" 
-                  name="Spend"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="budget_amount" 
-                  stroke="#82ca9d" 
-                  name="Budget"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <CampaignInsights />
+        <PredictiveAnalytics />
+      </div>
+
+      <CampaignMetrics />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredCampaigns.map((campaign) => (
