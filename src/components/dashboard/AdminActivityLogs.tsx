@@ -11,6 +11,10 @@ interface ActivityLog {
   details: Record<string, any>;
   ip_address: string | null;
   created_at: string;
+  profiles: {
+    full_name: string;
+    email: string;
+  } | null;
 }
 
 export function AdminActivityLogs() {
