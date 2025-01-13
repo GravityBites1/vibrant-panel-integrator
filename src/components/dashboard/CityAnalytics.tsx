@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, HeatMapGrid } from 'recharts';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,6 +9,14 @@ interface CityMetrics {
   avg_delivery_time: number;
   revenue: number;
   period_start: string;
+}
+
+interface LeadPartnerMetrics {
+  partner_id: string;
+  name: string;
+  stores_onboarded: number;
+  revenue_generated: number;
+  active_stores: number;
 }
 
 export function CityAnalytics({ cityId }: { cityId: string }) {
@@ -26,6 +34,18 @@ export function CityAnalytics({ cityId }: { cityId: string }) {
     }
   });
 
+  const { data: leadPartnerMetrics } = useQuery({
+    queryKey: ['leadPartnerMetrics', cityId],
+    queryFn: async () => {
+      // Demo data for lead partner performance
+      return [
+        { partner_id: '1', name: 'Partner A', stores_onboarded: 25, revenue_generated: 50000, active_stores: 20 },
+        { partner_id: '2', name: 'Partner B', stores_onboarded: 18, revenue_generated: 35000, active_stores: 15 },
+        { partner_id: '3', name: 'Partner C', stores_onboarded: 30, revenue_generated: 65000, active_stores: 28 },
+      ] as LeadPartnerMetrics[];
+    }
+  });
+
   if (!metrics?.length) {
     return <div>No analytics data available</div>;
   }
@@ -40,6 +60,7 @@ export function CityAnalytics({ cityId }: { cityId: string }) {
           <div className="text-2xl font-bold">{metrics[metrics.length - 1].total_orders}</div>
         </CardContent>
       </Card>
+      
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
@@ -50,6 +71,7 @@ export function CityAnalytics({ cityId }: { cityId: string }) {
           </div>
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Avg Delivery Time</CardTitle>
@@ -58,6 +80,7 @@ export function CityAnalytics({ cityId }: { cityId: string }) {
           <div className="text-2xl font-bold">{metrics[metrics.length - 1].avg_delivery_time} min</div>
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Revenue</CardTitle>
@@ -67,12 +90,13 @@ export function CityAnalytics({ cityId }: { cityId: string }) {
         </CardContent>
       </Card>
 
+      {/* Revenue Trend Line Chart */}
       <Card className="col-span-2">
         <CardHeader>
-          <CardTitle>Delivery Success Rate Trend</CardTitle>
+          <CardTitle>Revenue Trend</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[200px]">
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={metrics}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -86,7 +110,7 @@ export function CityAnalytics({ cityId }: { cityId: string }) {
                 />
                 <Line 
                   type="monotone" 
-                  dataKey="delivery_success_rate" 
+                  dataKey="revenue" 
                   stroke="#8884d8" 
                 />
               </LineChart>
@@ -95,24 +119,21 @@ export function CityAnalytics({ cityId }: { cityId: string }) {
         </CardContent>
       </Card>
 
+      {/* Lead Partner Performance Bar Chart */}
       <Card className="col-span-2">
         <CardHeader>
-          <CardTitle>Revenue Trend</CardTitle>
+          <CardTitle>Lead Partner Performance</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[200px]">
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={metrics}>
+              <BarChart data={leadPartnerMetrics}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="period_start" 
-                  tickFormatter={(value) => new Date(value).toLocaleDateString()}
-                />
+                <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip 
-                  labelFormatter={(value) => new Date(value).toLocaleDateString()}
-                />
-                <Bar dataKey="revenue" fill="#8884d8" />
+                <Tooltip />
+                <Bar dataKey="stores_onboarded" fill="#8884d8" name="Stores Onboarded" />
+                <Bar dataKey="active_stores" fill="#82ca9d" name="Active Stores" />
               </BarChart>
             </ResponsiveContainer>
           </div>
