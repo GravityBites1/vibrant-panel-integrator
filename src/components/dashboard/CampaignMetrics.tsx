@@ -12,19 +12,11 @@ interface CampaignMetric {
   revenue: number;
 }
 
-interface AdClickCount {
-  count: number;
-}
-
-interface AdConversionCount {
-  count: number;
-}
-
 interface AdImpressionData {
   created_at: string;
   campaign_id: string;
-  ad_clicks: AdClickCount[];
-  ad_conversions: AdConversionCount[];
+  clicks_count: number;
+  conversions_count: number;
 }
 
 export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
@@ -33,17 +25,22 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
     queryFn: async () => {
       console.log('Fetching campaign metrics...');
       
-      // If no campaignId, get aggregated metrics for all campaigns
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
       const query = supabase
         .from('ad_impressions')
         .select(`
           created_at,
           campaign_id,
-          ad_clicks (count),
-          ad_conversions (count)
+          (SELECT count(*) FROM ad_clicks WHERE ad_clicks.campaign_id = ad_impressions.campaign_id) as clicks_count,
+          (SELECT count(*) FROM ad_conversions WHERE ad_conversions.campaign_id = ad_impressions.campaign_id) as conversions_count
         `)
-        .eq(campaignId ? 'campaign_id' : 'campaign_id', campaignId)
-        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+        .gte('created_at', sevenDaysAgo.toISOString());
+
+      if (campaignId) {
+        query.eq('campaign_id', campaignId);
+      }
 
       const { data, error } = await query;
 
@@ -53,7 +50,7 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
       }
 
       // Process and aggregate data by date
-      const aggregatedData = (data as unknown as AdImpressionData[]).reduce((acc: Record<string, CampaignMetric>, curr) => {
+      const aggregatedData = (data as AdImpressionData[]).reduce((acc: Record<string, CampaignMetric>, curr) => {
         const date = new Date(curr.created_at).toISOString().split('T')[0];
         if (!acc[date]) {
           acc[date] = {
@@ -66,8 +63,8 @@ export function CampaignMetrics({ campaignId }: { campaignId?: string }) {
           };
         }
         acc[date].impressions++;
-        acc[date].clicks += curr.ad_clicks?.[0]?.count || 0;
-        acc[date].conversions += curr.ad_conversions?.[0]?.count || 0;
+        acc[date].clicks = curr.clicks_count;
+        acc[date].conversions = curr.conversions_count;
         return acc;
       }, {});
 

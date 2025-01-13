@@ -186,6 +186,13 @@ export type Database = {
             referencedRelation: "ad_contents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_ad_clicks_impressions"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ad_contents: {
@@ -289,6 +296,13 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_ad_conversions_impressions"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ad_impressions: {
@@ -329,6 +343,13 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: false
             referencedRelation: "ad_contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_ad_impressions_campaigns"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
             referencedColumns: ["id"]
           },
         ]
