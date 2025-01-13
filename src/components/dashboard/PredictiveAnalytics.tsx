@@ -14,13 +14,23 @@ export function PredictiveAnalytics() {
   const { data: predictions, isLoading } = useQuery({
     queryKey: ['predictions'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('predictions')
-        .select('*')
-        .order('date', { ascending: true });
+      // Generate demo prediction data for the next 7 days
+      const demoPredictions: Prediction[] = Array.from({ length: 7 }).map((_, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() + index);
+        const baseOrders = 250;
+        const baseRevenue = 60000;
+        const trendFactor = 1 + (index * 0.05); // 5% increase trend
+        const randomVariation = 0.9 + Math.random() * 0.2; // ±10% random variation
 
-      if (error) throw error;
-      return data as Prediction[];
+        return {
+          date: date.toISOString(),
+          predicted_orders: Math.round(baseOrders * trendFactor * randomVariation),
+          predicted_revenue: Math.round(baseRevenue * trendFactor * randomVariation),
+          confidence: 85 + Math.random() * 10
+        };
+      });
+      return demoPredictions;
     }
   });
 

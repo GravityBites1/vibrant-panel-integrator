@@ -15,14 +15,19 @@ export function PerformanceMetrics() {
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['performanceMetrics'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('performance_metrics')
-        .select('*')
-        .order('date', { ascending: true })
-        .limit(30);
-
-      if (error) throw error;
-      return data as MetricData[];
+      // For demo purposes, return static data
+      const demoData: MetricData[] = Array.from({ length: 30 }).map((_, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (29 - index));
+        return {
+          date: date.toISOString(),
+          revenue: 50000 + Math.floor(Math.random() * 20000),
+          orders: 200 + Math.floor(Math.random() * 100),
+          active_partners: 80 + Math.floor(Math.random() * 20),
+          stores_onboarded: 150 + Math.floor(Math.random() * 10)
+        };
+      });
+      return demoData;
     }
   });
 
