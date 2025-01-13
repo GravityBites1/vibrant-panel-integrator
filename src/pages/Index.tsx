@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { PerformanceMetrics } from "@/components/dashboard/PerformanceMetrics";
 import { AIInsights } from "@/components/dashboard/AIInsights";
 import { PredictiveAnalytics } from "@/components/dashboard/PredictiveAnalytics";
+import { CustomReports } from "@/components/dashboard/CustomReports";
+import { AdminActivityLogs } from "@/components/dashboard/AdminActivityLogs";
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -183,6 +185,10 @@ const Index = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <AIInsights />
                   <PredictiveAnalytics />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <CustomReports />
+                  <AdminActivityLogs />
                 </div>
               </div>
             ) : (

@@ -374,6 +374,33 @@ export type Database = {
           },
         ]
       }
+      admin_activity_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string | null
+          details: Json
+          id: string
+          ip_address: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json
+          id?: string
+          ip_address?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json
+          id?: string
+          ip_address?: string | null
+        }
+        Relationships: []
+      }
       admin_audit_logs: {
         Row: {
           action: string
@@ -1268,6 +1295,45 @@ export type Database = {
           tier_1_threshold?: number | null
           tier_2_rate?: number | null
           tier_2_threshold?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      custom_reports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          filters: Json
+          format: Database["public"]["Enums"]["report_format"]
+          id: string
+          last_generated: string | null
+          name: string
+          schedule: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          filters?: Json
+          format: Database["public"]["Enums"]["report_format"]
+          id?: string
+          last_generated?: string | null
+          name: string
+          schedule?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          filters?: Json
+          format?: Database["public"]["Enums"]["report_format"]
+          id?: string
+          last_generated?: string | null
+          name?: string
+          schedule?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -4182,6 +4248,44 @@ export type Database = {
             columns: ["referred_partner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_executions: {
+        Row: {
+          error_message: string | null
+          executed_by: string | null
+          execution_time: string | null
+          file_url: string | null
+          id: string
+          report_id: string | null
+          status: string
+        }
+        Insert: {
+          error_message?: string | null
+          executed_by?: string | null
+          execution_time?: string | null
+          file_url?: string | null
+          id?: string
+          report_id?: string | null
+          status?: string
+        }
+        Update: {
+          error_message?: string | null
+          executed_by?: string | null
+          execution_time?: string | null
+          file_url?: string | null
+          id?: string
+          report_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_executions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "custom_reports"
             referencedColumns: ["id"]
           },
         ]
@@ -9642,6 +9746,7 @@ export type Database = {
         | "buy_one_get_one"
         | "free_item"
       question_type: "multiple_choice" | "rating" | "text" | "boolean" | "scale"
+      report_format: "csv" | "pdf" | "excel"
       size_group: "regular" | "medium" | "large"
       store_notification_type: "new_order" | "payout" | "rating" | "low_stock"
       store_registration_status:
