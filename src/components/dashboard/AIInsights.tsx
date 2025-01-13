@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
 
 interface InsightMetric {
@@ -18,6 +17,21 @@ interface InsightMetric {
   };
 }
 
+interface RawInsight {
+  id: string;
+  type: string;
+  message: string;
+  severity: 'info' | 'warning' | 'success';
+  created_at: string;
+  metrics: {
+    current_value: number;
+    previous_value: number;
+    change_percentage: number;
+    trend: 'up' | 'down' | 'stable';
+  } | null;
+  updated_at: string;
+}
+
 export function AIInsights() {
   const { data: insights, isLoading } = useQuery({
     queryKey: ['aiInsights'],
@@ -29,7 +43,21 @@ export function AIInsights() {
         .limit(5);
 
       if (error) throw error;
-      return data as InsightMetric[];
+      
+      // Transform the raw data to match our InsightMetric interface
+      return (data as RawInsight[]).map(insight => ({
+        id: insight.id,
+        type: insight.type,
+        message: insight.message,
+        severity: insight.severity,
+        created_at: insight.created_at,
+        metrics: insight.metrics || {
+          current_value: 0,
+          previous_value: 0,
+          change_percentage: 0,
+          trend: 'stable' as const
+        }
+      })) as InsightMetric[];
     }
   });
 
