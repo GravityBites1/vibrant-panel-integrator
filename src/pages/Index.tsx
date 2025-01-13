@@ -1,10 +1,6 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
-} from 'recharts';
 import { 
   LayoutDashboard, Users, ShoppingCart, Settings, Menu, 
   LogOut, Sun, Moon, Loader, Store, LineChart as CampaignIcon, 
@@ -16,21 +12,15 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setStats, toggleDarkMode, toggleSidebar, setLoading } from "@/store/slices/dashboardSlice";
 import { supabase } from "@/integrations/supabase/client";
+import { PerformanceMetrics } from "@/components/dashboard/PerformanceMetrics";
+import { AIInsights } from "@/components/dashboard/AIInsights";
+import { PredictiveAnalytics } from "@/components/dashboard/PredictiveAnalytics";
 
 const Index = () => {
   const dispatch = useAppDispatch();
   const { stats, isDarkMode, isSidebarOpen, isLoading } = useAppSelector(state => state.dashboard);
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Sample data for chart
-  const data = [
-    { name: 'Jan', value: 400 },
-    { name: 'Feb', value: 300 },
-    { name: 'Mar', value: 600 },
-    { name: 'Apr', value: 800 },
-    { name: 'May', value: 700 }
-  ];
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -188,68 +178,13 @@ const Index = () => {
             </div>
 
             {location.pathname === '/' ? (
-              <>
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm font-medium">
-                        Total Orders
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats.totalOrders}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm font-medium">
-                        Total Users
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm font-medium">
-                        Total Revenue
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        ${stats.revenue.toFixed(2)}
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="space-y-6">
+                <PerformanceMetrics />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <AIInsights />
+                  <PredictiveAnalytics />
                 </div>
-
-                {/* Chart */}
-                <Card className="mb-8">
-                  <CardHeader>
-                    <CardTitle>Revenue Overview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={data}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="#6e59a5" 
-                            strokeWidth={2} 
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
+              </div>
             ) : (
               <Outlet />
             )}

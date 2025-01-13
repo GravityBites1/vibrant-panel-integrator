@@ -577,6 +577,36 @@ export type Database = {
           },
         ]
       }
+      ai_insights: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          metrics: Json | null
+          severity: Database["public"]["Enums"]["insight_severity"]
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          metrics?: Json | null
+          severity?: Database["public"]["Enums"]["insight_severity"]
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          metrics?: Json | null
+          severity?: Database["public"]["Enums"]["insight_severity"]
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       audit_log_categories: {
         Row: {
           created_at: string | null
@@ -3384,6 +3414,36 @@ export type Database = {
           },
         ]
       }
+      performance_metrics: {
+        Row: {
+          active_partners: number
+          created_at: string | null
+          date: string
+          id: string
+          orders: number
+          revenue: number
+          stores_onboarded: number
+        }
+        Insert: {
+          active_partners?: number
+          created_at?: string | null
+          date: string
+          id?: string
+          orders?: number
+          revenue?: number
+          stores_onboarded?: number
+        }
+        Update: {
+          active_partners?: number
+          created_at?: string | null
+          date?: string
+          id?: string
+          orders?: number
+          revenue?: number
+          stores_onboarded?: number
+        }
+        Relationships: []
+      }
       platform_categories: {
         Row: {
           commission_rate: number
@@ -3623,6 +3683,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      predictions: {
+        Row: {
+          confidence: number
+          created_at: string | null
+          date: string
+          factors: Json | null
+          id: string
+          predicted_orders: number
+          predicted_revenue: number
+        }
+        Insert: {
+          confidence: number
+          created_at?: string | null
+          date: string
+          factors?: Json | null
+          id?: string
+          predicted_orders: number
+          predicted_revenue: number
+        }
+        Update: {
+          confidence?: number
+          created_at?: string | null
+          date?: string
+          factors?: Json | null
+          id?: string
+          predicted_orders?: number
+          predicted_revenue?: number
+        }
+        Relationships: []
       }
       product_size_variants: {
         Row: {
@@ -9530,6 +9620,7 @@ export type Database = {
       city_status: "active" | "inactive"
       content_status: "pending" | "approved" | "rejected" | "hidden" | "flagged"
       content_type: "review" | "comment" | "report"
+      insight_severity: "info" | "warning" | "success"
       order_status:
         | "pending"
         | "confirmed"
