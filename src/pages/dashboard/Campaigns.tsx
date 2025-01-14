@@ -128,8 +128,6 @@ export default function Campaigns() {
 
   const handleFilterChange = (newFilters: CampaignFiltersType) => {
     setFilters(newFilters);
-    // Apply filters to campaigns data
-    // This is where you would implement the filtering logic
   };
 
   const toggleTheme = () => {

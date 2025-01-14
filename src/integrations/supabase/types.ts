@@ -86,9 +86,6 @@ export type Database = {
       }
       ad_campaigns: {
         Row: {
-          approval_date: string | null
-          approval_status: string | null
-          approved_by: string | null
           bid_amount: number
           billing_type: string
           budget_amount: number
@@ -98,7 +95,6 @@ export type Database = {
           end_date: string | null
           id: string
           name: string
-          rejection_reason: string | null
           restaurant_id: string | null
           spent_amount: number | null
           start_date: string | null
@@ -107,9 +103,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          approval_date?: string | null
-          approval_status?: string | null
-          approved_by?: string | null
           bid_amount: number
           billing_type: string
           budget_amount: number
@@ -119,7 +112,6 @@ export type Database = {
           end_date?: string | null
           id?: string
           name: string
-          rejection_reason?: string | null
           restaurant_id?: string | null
           spent_amount?: number | null
           start_date?: string | null
@@ -128,9 +120,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          approval_date?: string | null
-          approval_status?: string | null
-          approved_by?: string | null
           bid_amount?: number
           billing_type?: string
           budget_amount?: number
@@ -140,7 +129,6 @@ export type Database = {
           end_date?: string | null
           id?: string
           name?: string
-          rejection_reason?: string | null
           restaurant_id?: string | null
           spent_amount?: number | null
           start_date?: string | null
@@ -149,13 +137,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "ad_campaigns_approved_by_fkey"
-            columns: ["approved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "ad_campaigns_restaurant_id_fkey"
             columns: ["restaurant_id"]
